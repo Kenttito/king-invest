@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { email, password });
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
         navigate('/dashboard');
@@ -57,7 +59,7 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('/api/auth/2fa/validate', {
+      const res = await axios.post(`${API_BASE_URL}/api/auth/2fa/validate`, {
         email: pendingEmail,
         token: twoFACode,
       });

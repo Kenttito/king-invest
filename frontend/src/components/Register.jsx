@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import countries from '../data/countries';
 import currencies from '../data/currencies';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,12 +30,12 @@ const Register = () => {
     }
     
     // Combine country code with phone number
-    const fullPhoneNumber = phoneCountryCode + phone.replace(/^\+/, '');
+    const fullPhoneNumber = phoneCountryCode + phone.replace(/^[Ak]/, '');
     
     setLoading(true);
     try {
       console.log('Attempting registration with:', { email, password, country, currency, phone: fullPhoneNumber, firstName, lastName });
-      const res = await axios.post('/api/auth/register', { email, password, country, currency, phone: fullPhoneNumber, firstName, lastName });
+      const res = await axios.post(`${API_BASE_URL}/api/auth/register`, { email, password, country, currency, phone: fullPhoneNumber, firstName, lastName });
       console.log('Registration response:', res.data);
       
       // Navigate to email verification page

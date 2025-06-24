@@ -40,46 +40,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 5001;
 
-// Simple health check endpoint - respond immediately
-app.get('/api/health', (req, res) => {
-  console.log('🏥 Health check requested');
-  res.status(200).json({ 
-    status: 'ok', 
-    message: 'API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    port: PORT
-  });
-});
-
-// Root endpoint for basic connectivity test
-app.get('/', (req, res) => {
-  console.log('🏠 Root endpoint requested');
-  res.status(200).json({ 
-    message: 'Kings Invest API Server',
-    status: 'running',
-    timestamp: new Date().toISOString(),
-    port: PORT
-  });
-});
-
-// Add routes
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/transaction', transactionRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/investment-plans', investmentPlanRoutes);
-app.use('/api/trader-signals', traderSignalsRouter);
-app.use('/api/demo', demoRoutes);
+app.get('/', (req, res) => res.send('OK'));
 
 // Create server
 const server = http.createServer(app);
 
 // Start server first, then handle database and WebSocket connections
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🔗 Health check available at: http://0.0.0.0:${PORT}/api/health`);
-  console.log(`🌐 Root endpoint available at: http://0.0.0.0:${PORT}/`);
+  console.log('Minimal server running on', PORT);
   
   // Connect to database after server is running
   if (process.env.MONGODB_URI) {

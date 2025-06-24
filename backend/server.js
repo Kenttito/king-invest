@@ -1,4 +1,21 @@
 require('dotenv').config();
+
+// Debug environment variables
+console.log('🔍 Environment Variables Debug');
+console.log('==============================');
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✅ SET' : '❌ NOT SET');
+console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✅ SET' : '❌ NOT SET');
+console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ SET' : '❌ NOT SET');
+console.log('PORT:', process.env.PORT || '5001 (default)');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
+
+if (process.env.MONGODB_URI) {
+  console.log('\n📋 MONGODB_URI preview (first 50 chars):', process.env.MONGODB_URI.substring(0, 50) + '...');
+} else {
+  console.log('\n❌ MONGODB_URI is missing!');
+  console.log('💡 Make sure to add MONGODB_URI to Railway environment variables');
+}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');

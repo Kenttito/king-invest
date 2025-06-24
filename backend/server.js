@@ -1,3 +1,5 @@
+console.log('🚀 server.js is running');
+
 require('dotenv').config();
 
 // Debug environment variables
@@ -38,7 +40,7 @@ app.use(express.json());
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 8080;
 
 app.get('/', (req, res) => res.send('OK'));
 app.get('/api/health', (req, res) => res.send('OK'));

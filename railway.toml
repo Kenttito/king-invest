@@ -3,6 +3,6 @@ builder = "nixpacks"
 buildCommand = "cd backend && npm install"
 
 [deploy]
-startCommand = "cd backend && node server.js"
-healthcheckPath = "/"
+startCommand = "node server.js"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 300 

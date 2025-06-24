@@ -41,6 +41,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const PORT = process.env.PORT || 5001;
 
 app.get('/', (req, res) => res.send('OK'));
+app.get('/api/health', (req, res) => res.send('OK'));
 
 // Create server
 const server = http.createServer(app);

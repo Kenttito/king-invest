@@ -40,10 +40,23 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 5001;
 
-connectDB();
-
+// Health check endpoint - respond immediately
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'API is running' });
+  res.json({ 
+    status: 'ok', 
+    message: 'API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Root endpoint for basic connectivity test
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Kings Invest API Server',
+    status: 'running',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.use('/api/auth', authRoutes);
@@ -61,6 +74,16 @@ startTraderSignalsWebSocket(server);
 // Start WebSocket for live Binance trades
 startBinanceTradesWebSocket(server);
 
+// Start server immediately, then connect to database
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🔗 Health check available at: http://localhost:${PORT}/api/health`);
+  
+  // Connect to database after server is running
+  connectDB().then(() => {
+    console.log('✅ Database connected successfully');
+  }).catch((err) => {
+    console.error('❌ Database connection failed:', err.message);
+    // Don't exit process, let server continue running
+  });
 });

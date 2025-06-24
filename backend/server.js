@@ -8,7 +8,7 @@ console.log('==============================');
 console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✅ SET' : '❌ NOT SET');
 console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✅ SET' : '❌ NOT SET');
 console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ SET' : '❌ NOT SET');
-console.log('PORT:', process.env.PORT || '5001 (default)');
+console.log('PORT:', process.env.PORT || '8080 (default)');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
 
 if (process.env.MONGODB_URI) {
@@ -45,12 +45,21 @@ const PORT = process.env.PORT || 8080;
 app.get('/', (req, res) => res.send('OK'));
 app.get('/api/health', (req, res) => res.send('OK'));
 
+// Add all routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/transaction', transactionRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/investment-plans', investmentPlanRoutes);
+app.use('/api/trader-signals', traderSignalsRouter);
+app.use('/api/demo', demoRoutes);
+
 // Create server
 const server = http.createServer(app);
 
 // Start server first, then handle database and WebSocket connections
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('Minimal server running on', PORT);
+  console.log('🚀 Full backend server running on', PORT);
   
   // Connect to database after server is running
   if (process.env.MONGODB_URI) {

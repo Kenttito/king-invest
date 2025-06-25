@@ -111,42 +111,50 @@ exports.updateCryptoAddresses = async (req, res) => {
     console.log('Request body:', req.body);
     console.log('Request files:', req.files);
     
+    // Fetch existing config to preserve any fields not being updated
+    let existingConfig = await Config.findOne({ key: 'crypto_addresses' });
+    let existingAddresses = existingConfig ? existingConfig.value : {};
+    
+    console.log('Existing addresses in DB:', existingAddresses);
+    
     const { BTC, ETH, USDT, XRP } = req.body;
     
-    // Validate addresses
-    if (!BTC || !ETH || !USDT || !XRP) {
-      console.log('Missing addresses:', { BTC, ETH, USDT, XRP });
-      return res.status(400).json({ message: 'All crypto addresses are required' });
-    }
+    // Merge new values with existing values, so no field is lost
+    const addresses = { 
+      BTC: BTC || existingAddresses.BTC || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      ETH: ETH || existingAddresses.ETH || '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+      USDT: USDT || existingAddresses.USDT || 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa',
+      XRP: XRP || existingAddresses.XRP || 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh'
+    };
     
-    // Basic validation for each address type
-    if (!BTC.startsWith('bc1') && !BTC.startsWith('1') && !BTC.startsWith('3')) {
+    console.log('Merged addresses to save:', addresses);
+    
+    // Validate addresses (only validate if they are provided)
+    if (BTC && (!BTC.startsWith('bc1') && !BTC.startsWith('1') && !BTC.startsWith('3'))) {
       console.log('Invalid BTC address:', BTC);
       return res.status(400).json({ message: 'Invalid BTC address format' });
     }
     
-    if (!ETH.startsWith('0x') || ETH.length !== 42) {
+    if (ETH && (!ETH.startsWith('0x') || ETH.length !== 42)) {
       console.log('Invalid ETH address:', ETH);
       return res.status(400).json({ message: 'Invalid ETH address format' });
     }
     
-    if (!USDT.startsWith('T') || USDT.length < 30) {
+    if (USDT && (!USDT.startsWith('T') || USDT.length < 30)) {
       console.log('Invalid USDT address:', USDT);
       return res.status(400).json({ message: 'Invalid USDT address format' });
     }
-    // XRP validation: starts with 'r' and length between 25 and 35 (typical for XRP)
-    if (!XRP.startsWith('r') || XRP.length < 25 || XRP.length > 35) {
+    
+    if (XRP && (!XRP.startsWith('r') || XRP.length < 25 || XRP.length > 35)) {
       console.log('Invalid XRP address:', XRP);
       return res.status(400).json({ message: 'Invalid XRP address format' });
     }
     
-    // Create addresses object with QR code image paths
-    const addresses = { 
-      BTC, 
-      ETH, 
-      USDT,
-      XRP
-    };
+    // Preserve existing QR codes if not being updated
+    if (existingAddresses.BTC_QR) addresses.BTC_QR = existingAddresses.BTC_QR;
+    if (existingAddresses.ETH_QR) addresses.ETH_QR = existingAddresses.ETH_QR;
+    if (existingAddresses.USDT_QR) addresses.USDT_QR = existingAddresses.USDT_QR;
+    if (existingAddresses.XRP_QR) addresses.XRP_QR = existingAddresses.XRP_QR;
     
     // Add QR code image paths if files were uploaded
     if (req.files) {
@@ -164,7 +172,7 @@ exports.updateCryptoAddresses = async (req, res) => {
       }
     }
     
-    console.log('Valid addresses and QR codes to save:', addresses);
+    console.log('Final addresses and QR codes to save:', addresses);
     console.log('XRP address being saved:', addresses.XRP);
     
     // Update or create the config

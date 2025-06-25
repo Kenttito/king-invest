@@ -198,7 +198,7 @@ const Profile = () => {
                   </h5>
                   <small className="text-muted">Your account information and preferences</small>
                 </div>
-                <div className="card-body">
+            <div className="card-body">
                   <div className="row g-3">
                     <div className="col-md-6">
                       <div className="p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px' }}>

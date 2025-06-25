@@ -4,10 +4,7 @@ require('dotenv').config();
 const User = require('../models/User');
 
 async function createAdmin() {
-  await mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect(process.env.MONGODB_URI);
 
   const email = 'admin@yourplatform.com';
   const password = 'admin123';

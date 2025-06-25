@@ -2,10 +2,7 @@ const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/kingsinvest', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect('mongodb://localhost:27017/kingsinvest');
 
 async function fixTransactionStatus() {
   try {

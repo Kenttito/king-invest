@@ -132,71 +132,71 @@ const Withdrawal = () => {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label fw-bold">Type</label>
-                      <select 
-                        className="form-select" 
-                        value={withdrawType} 
-                        onChange={e => setWithdrawType(e.target.value)}
+                    <select 
+                      className="form-select" 
+                      value={withdrawType} 
+                      onChange={e => setWithdrawType(e.target.value)}
                         style={{ borderRadius: '8px' }}
-                      >
-                        <option value="fiat">Fiat</option>
-                        <option value="crypto">Crypto</option>
-                      </select>
-                    </div>
+                    >
+                      <option value="fiat">Fiat</option>
+                      <option value="crypto">Crypto</option>
+                    </select>
+                  </div>
                     <div className="col-md-6">
                       <label className="form-label fw-bold">Currency</label>
-                      <select 
-                        className="form-select" 
-                        value={withdrawCurrency} 
-                        onChange={e => setWithdrawCurrency(e.target.value)}
+                    <select 
+                      className="form-select" 
+                      value={withdrawCurrency} 
+                      onChange={e => setWithdrawCurrency(e.target.value)}
                         style={{ borderRadius: '8px' }}
-                      >
-                        {CURRENCIES.filter(c => c.type === withdrawType).map(c => (
-                          <option value={c.value} key={c.value}>{c.label}</option>
-                        ))}
-                      </select>
-                    </div>
+                    >
+                      {CURRENCIES.filter(c => c.type === withdrawType).map(c => (
+                        <option value={c.value} key={c.value}>{c.label}</option>
+                      ))}
+                    </select>
+                  </div>
                     
                     <div className="col-12">
                       <label className="form-label fw-bold">Amount</label>
-                      <input 
-                        type="number" 
-                        className="form-control" 
+                    <input 
+                      type="number" 
+                      className="form-control" 
                         placeholder="Enter withdrawal amount" 
-                        value={withdrawAmount} 
-                        onChange={e => setWithdrawAmount(e.target.value)} 
-                        min={1} 
-                        required 
+                      value={withdrawAmount} 
+                      onChange={e => setWithdrawAmount(e.target.value)} 
+                      min={1} 
+                      required 
                         style={{ borderRadius: '8px' }}
-                      />
-                    </div>
+                    />
+                  </div>
                     
-                    {withdrawType === 'crypto' && (
+                  {withdrawType === 'crypto' && (
                       <div className="col-12">
                         <label className="form-label fw-bold">
                           <i className="fab fa-bitcoin me-2" style={{ color: '#d4af37' }}></i>
                           {getAddressLabel()}
                         </label>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          placeholder={getAddressPlaceholder()} 
-                          value={receiveAddress} 
-                          onChange={e => setReceiveAddress(e.target.value)} 
-                          required
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder={getAddressPlaceholder()} 
+                        value={receiveAddress} 
+                        onChange={e => setReceiveAddress(e.target.value)} 
+                        required
                           style={{ borderRadius: '8px' }}
-                        />
+                      />
                         <small className="text-muted">
                           <i className="fas fa-info-circle me-1"></i>
                           Please ensure the address is correct. Incorrect addresses may result in permanent loss of funds.
                         </small>
-                      </div>
-                    )}
+                    </div>
+                  )}
                     
                     <div className="col-12">
-                      <button 
+                    <button 
                         className="btn w-100" 
-                        type="submit"
-                        disabled={loading}
+                      type="submit"
+                      disabled={loading}
                         style={{ 
                           backgroundColor: '#d4af37', 
                           borderColor: '#d4af37',
@@ -205,7 +205,7 @@ const Withdrawal = () => {
                           padding: '12px 20px',
                           fontWeight: '600'
                         }}
-                      >
+                    >
                         {loading ? (
                           <>
                             <i className="fas fa-spinner fa-spin me-2"></i>
@@ -217,7 +217,7 @@ const Withdrawal = () => {
                             Withdraw Funds
                           </>
                         )}
-                      </button>
+                    </button>
                     </div>
                   </div>
                 </form>

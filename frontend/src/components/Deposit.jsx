@@ -82,8 +82,8 @@ const Deposit = () => {
         
         try {
           document.execCommand('copy');
-          setCopyMsg('Address copied to clipboard!');
-          setTimeout(() => setCopyMsg(''), 3000);
+    setCopyMsg('Address copied to clipboard!');
+    setTimeout(() => setCopyMsg(''), 3000);
         } catch (err) {
           console.error('Fallback copy failed:', err);
           setCopyMsg('Copy failed. Please select and copy manually.');
@@ -229,8 +229,8 @@ const Deposit = () => {
                         <div className="col-lg-8 col-md-7">
                           <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
                             <code id={`address-${depositCurrency}`} className="text-break mb-2 mb-md-0">{cryptoAddresses[depositCurrency]}</code>
-                            <button 
-                              type="button" 
+                        <button 
+                          type="button" 
                               className="btn btn-sm"
                               style={{ 
                                 backgroundColor: '#d4af37', 
@@ -240,10 +240,10 @@ const Deposit = () => {
                                 fontWeight: '600'
                               }}
                               onClick={() => copyToClipboard(cryptoAddresses[depositCurrency])}
-                            >
+                        >
                               <i className="fas fa-copy me-1"></i>
-                              Copy
-                            </button>
+                          Copy
+                        </button>
                           </div>
                         </div>
                         <div className="col-lg-4 col-md-5 text-center mt-3 mt-md-0">

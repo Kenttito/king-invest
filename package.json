@@ -25,6 +25,8 @@
   "author": "Kenneth Ehidiamhen",
   "license": "MIT",
   "dependencies": {
+    "ajv": "^6.12.6",
+    "ajv-keywords": "^3.5.2",
     "axios": "^1.10.0",
     "multer": "^2.0.1"
   }

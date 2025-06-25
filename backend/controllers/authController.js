@@ -418,7 +418,7 @@ exports.validate2FA = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
-};
+}; 
 
 // Admin login as user
 exports.adminLoginAsUser = async (req, res) => {

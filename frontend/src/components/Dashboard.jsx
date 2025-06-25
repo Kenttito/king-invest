@@ -38,34 +38,34 @@ const Dashboard = () => {
   const token = localStorage.getItem('token');
 
   const fetchData = async () => {
-    setLoading(true);
-    setError('');
-    try {
+      setLoading(true);
+      setError('');
+      try {
       // Use impersonation token if available, otherwise use regular token
       const token = localStorage.getItem('impersonationToken') || localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
+        if (!token) {
+          navigate('/login');
+          return;
+        }
 
-      // Fetch wallet data
-      const walletRes = await axios.get('/api/user/wallet', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setWallet(walletRes.data);
-    } catch (err) {
-      if (err.response?.status === 401) {
-        localStorage.removeItem('token');
+        // Fetch wallet data
+        const walletRes = await axios.get('/api/user/wallet', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setWallet(walletRes.data);
+      } catch (err) {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
         localStorage.removeItem('impersonationToken');
         localStorage.removeItem('originalAdminToken');
         localStorage.removeItem('impersonatedUser');
-        navigate('/login');
-      } else {
-        setError('Failed to fetch dashboard data');
+          navigate('/login');
+        } else {
+          setError('Failed to fetch dashboard data');
+        }
       }
-    }
-    setLoading(false);
-  };
+      setLoading(false);
+    };
 
   useEffect(() => {
     fetchData();
@@ -320,10 +320,10 @@ const Dashboard = () => {
           <div className="col-12">
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <h2 className="mb-0" style={{ color: '#d4af37', fontWeight: 'bold' }}>
-                  Dashboard
-                </h2>
-                <p className="text-muted">Welcome to your investment dashboard</p>
+            <h2 className="mb-0" style={{ color: '#d4af37', fontWeight: 'bold' }}>
+              Dashboard
+            </h2>
+            <p className="text-muted">Welcome to your investment dashboard</p>
               </div>
               <button 
                 className="btn btn-primary d-flex align-items-center gap-2"

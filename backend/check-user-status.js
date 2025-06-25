@@ -1,10 +1,7 @@
 const mongoose = require('mongoose');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/forexcrypto', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+mongoose.connect('mongodb://localhost:27017/forexcrypto');
 
 // User Schema
 const userSchema = new mongoose.Schema({

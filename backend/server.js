@@ -75,8 +75,8 @@ server.listen(PORT, '0.0.0.0', () => {
   
   // Start WebSocket connections
   try {
-    startTraderSignalsWebSocket(server);
-    startBinanceTradesWebSocket(server);
+startTraderSignalsWebSocket(server);
+startBinanceTradesWebSocket(server);
     console.log('✅ WebSocket connections started');
   } catch (error) {
     console.error('❌ WebSocket connection failed:', error.message);

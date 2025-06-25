@@ -288,23 +288,23 @@ const Register = () => {
                     </select>
                   </div>
                   <div className="col-md-8">
-                    <input
-                      type="tel"
-                      className="form-control"
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                      required
-                      pattern="[0-9\-\+\s]+"
-                      minLength={7}
-                      maxLength={20}
+                <input
+                  type="tel"
+                  className="form-control"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  required
+                  pattern="[0-9\-\+\s]+"
+                  minLength={7}
+                  maxLength={20}
                       placeholder="Phone number (without country code)"
-                      style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        border: '1px solid rgba(212, 175, 55, 0.3)',
-                        color: '#e0e0e0',
-                        borderRadius: '8px'
-                      }}
-                    />
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(212, 175, 55, 0.3)',
+                    color: '#e0e0e0',
+                    borderRadius: '8px'
+                  }}
+                />
                   </div>
                 </div>
                 <small className="text-muted" style={{ color: '#a0a0a0' }}>

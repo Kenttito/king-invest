@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 
 function App() {
   useEffect(() => {
@@ -14,9 +15,9 @@ function App() {
   }, []);
 
   return (
-    <div>
-      {/* Your app content goes here */}
-    </div>
+    <BrowserRouter>
+      <div>App Content</div>
+    </BrowserRouter>
   );
 }
 

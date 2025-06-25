@@ -12,6 +12,7 @@ const CURRENCIES = [
   { label: 'Bitcoin (BTC)', value: 'BTC', type: 'crypto' },
   { label: 'Ethereum (ETH)', value: 'ETH', type: 'crypto' },
   { label: 'Tether (USDT)', value: 'USDT', type: 'crypto' },
+  { label: 'Ripple (XRP)', value: 'XRP', type: 'crypto' },
 ];
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -30,12 +31,14 @@ const Deposit = () => {
   const [cryptoAddresses, setCryptoAddresses] = useState({
     BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     ETH: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-    USDT: 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa'
+    USDT: 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa',
+    XRP: 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh'
   });
   const [cryptoQRImages, setCryptoQRImages] = useState({
     BTC_QR: null,
     ETH_QR: null,
-    USDT_QR: null
+    USDT_QR: null,
+    XRP_QR: null
   });
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const navigate = useNavigate();
@@ -79,15 +82,16 @@ const Deposit = () => {
           setCryptoQRImages({
             BTC_QR: res.data.BTC_QR,
             ETH_QR: res.data.ETH_QR,
-            USDT_QR: res.data.USDT_QR
+            USDT_QR: res.data.USDT_QR,
+            XRP_QR: res.data.XRP_QR
           });
         } else {
-          setCryptoAddresses({ BTC: '', ETH: '', USDT: '' });
-          setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null });
+          setCryptoAddresses({ BTC: '', ETH: '', USDT: '', XRP: '' });
+          setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null, XRP_QR: null });
         }
       } catch (err) {
-        setCryptoAddresses({ BTC: '', ETH: '', USDT: '' });
-        setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null });
+        setCryptoAddresses({ BTC: '', ETH: '', USDT: '', XRP: '' });
+        setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null, XRP_QR: null });
         console.error('Failed to fetch crypto addresses:', err);
       } finally {
         setLoadingAddresses(false);
@@ -173,7 +177,7 @@ const Deposit = () => {
   };
 
   // Check if selected currency is crypto
-  const isCryptoCurrency = depositType === 'crypto' && ['BTC', 'ETH', 'USDT'].includes(depositCurrency);
+  const isCryptoCurrency = depositType === 'crypto' && ['BTC', 'ETH', 'USDT', 'XRP'].includes(depositCurrency);
 
   return (
     <div style={{ 
@@ -258,7 +262,8 @@ const Deposit = () => {
                         <i className="fab fa-bitcoin me-2" style={{ color: '#d4af37' }}></i>
                         {depositCurrency === 'BTC' ? 'BTC Deposit Address:' : 
                          depositCurrency === 'ETH' ? 'ETH Deposit Address:' : 
-                         'USDT Deposit Address:'}
+                         depositCurrency === 'USDT' ? 'USDT Deposit Address:' : 
+                         'XRP Deposit Address:'}
                       </label>
                       <div className="row">
                         <div className="col-lg-8 col-md-7">

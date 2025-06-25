@@ -41,12 +41,14 @@ const AdminDashboard = () => {
   const [cryptoForm, setCryptoForm] = useState({
     BTC: '',
     ETH: '',
-    USDT: ''
+    USDT: '',
+    XRP: ''
   });
   const [cryptoFiles, setCryptoFiles] = useState({
     BTC_QR: null,
     ETH_QR: null,
-    USDT_QR: null
+    USDT_QR: null,
+    XRP_QR: null
   });
   const [cryptoLoading, setCryptoLoading] = useState(false);
   const [cryptoMsg, setCryptoMsg] = useState('');
@@ -437,11 +439,11 @@ const AdminDashboard = () => {
       if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
         setCryptoForm(res.data);
       } else {
-        setCryptoForm({ BTC: '', ETH: '', USDT: '' });
+        setCryptoForm({ BTC: '', ETH: '', USDT: '', XRP: '' });
         setCryptoMsg('Failed to load crypto addresses.');
       }
     } catch (err) {
-      setCryptoForm({ BTC: '', ETH: '', USDT: '' });
+      setCryptoForm({ BTC: '', ETH: '', USDT: '', XRP: '' });
       setCryptoMsg('Failed to load crypto addresses.');
     }
   };
@@ -486,6 +488,7 @@ const AdminDashboard = () => {
       formData.append('BTC', cryptoForm.BTC);
       formData.append('ETH', cryptoForm.ETH);
       formData.append('USDT', cryptoForm.USDT);
+      formData.append('XRP', cryptoForm.XRP);
       
       // Append files if they exist
       if (cryptoFiles.BTC_QR) {
@@ -496,6 +499,9 @@ const AdminDashboard = () => {
       }
       if (cryptoFiles.USDT_QR) {
         formData.append('USDT_QR', cryptoFiles.USDT_QR);
+      }
+      if (cryptoFiles.XRP_QR) {
+        formData.append('XRP_QR', cryptoFiles.XRP_QR);
       }
       
       const res = await axios.put(`${API_BASE_URL}/api/admin/crypto-addresses`, formData, {
@@ -1007,7 +1013,7 @@ const AdminDashboard = () => {
                   )}
                   
                   <div className="row">
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <div className="mb-3">
                         <label className="form-label fw-bold">Bitcoin (BTC) Address</label>
                         <input 
@@ -1022,7 +1028,7 @@ const AdminDashboard = () => {
                         <small className="text-muted">Must start with bc1, 1, or 3</small>
                       </div>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <div className="mb-3">
                         <label className="form-label fw-bold">Ethereum (ETH) Address</label>
                         <input 
@@ -1037,7 +1043,7 @@ const AdminDashboard = () => {
                         <small className="text-muted">Must start with 0x and be 42 characters</small>
                       </div>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <div className="mb-3">
                         <label className="form-label fw-bold">Tether (USDT) Address</label>
                         <input 
@@ -1052,10 +1058,25 @@ const AdminDashboard = () => {
                         <small className="text-muted">Must start with T and be at least 30 characters</small>
                       </div>
                     </div>
+                    <div className="col-md-3">
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">Ripple (XRP) Address</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          name="XRP" 
+                          value={cryptoForm.XRP} 
+                          onChange={handleCryptoChange} 
+                          placeholder="Enter XRP address"
+                          required 
+                        />
+                        <small className="text-muted">Must start with r and be at least 24 characters</small>
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="row">
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <div className="mb-3">
                         <label className="form-label fw-bold">Bitcoin (BTC) QR Code Image</label>
                         <input 
@@ -1068,7 +1089,7 @@ const AdminDashboard = () => {
                         <small className="text-muted">Upload a QR code image for BTC (PNG, JPG, JPEG)</small>
                       </div>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <div className="mb-3">
                         <label className="form-label fw-bold">Ethereum (ETH) QR Code Image</label>
                         <input 
@@ -1081,7 +1102,7 @@ const AdminDashboard = () => {
                         <small className="text-muted">Upload a QR code image for ETH (PNG, JPG, JPEG)</small>
                       </div>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                       <div className="mb-3">
                         <label className="form-label fw-bold">Tether (USDT) QR Code Image</label>
                         <input 
@@ -1092,6 +1113,19 @@ const AdminDashboard = () => {
                           accept="image/*"
                         />
                         <small className="text-muted">Upload a QR code image for USDT (PNG, JPG, JPEG)</small>
+                      </div>
+                    </div>
+                    <div className="col-md-3">
+                      <div className="mb-3">
+                        <label className="form-label fw-bold">Ripple (XRP) QR Code Image</label>
+                        <input 
+                          type="file" 
+                          className="form-control" 
+                          name="XRP_QR" 
+                          onChange={handleCryptoFileChange} 
+                          accept="image/*"
+                        />
+                        <small className="text-muted">Upload a QR code image for XRP (PNG, JPG, JPEG)</small>
                       </div>
                     </div>
                   </div>

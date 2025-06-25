@@ -9,6 +9,7 @@ const CURRENCIES = [
   { label: 'Bitcoin (BTC)', value: 'BTC', type: 'crypto' },
   { label: 'Ethereum (ETH)', value: 'ETH', type: 'crypto' },
   { label: 'USDT', value: 'USDT', type: 'crypto' },
+  { label: 'Ripple (XRP)', value: 'XRP', type: 'crypto' },
 ];
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -96,6 +97,8 @@ const Withdrawal = () => {
         return 'Enter your Ethereum (ETH) receive address';
       case 'USDT':
         return 'Enter your USDT receive address';
+      case 'XRP':
+        return 'Enter your Ripple (XRP) receive address';
       default:
         return 'Enter receive address';
     }
@@ -110,6 +113,8 @@ const Withdrawal = () => {
         return 'Ethereum (ETH) Address';
       case 'USDT':
         return 'USDT Address';
+      case 'XRP':
+        return 'Ripple (XRP) Address';
       default:
         return 'Receive Address';
     }

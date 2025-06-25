@@ -306,15 +306,19 @@ exports.getWallet = async (req, res) => {
 // Get crypto addresses for deposit component
 exports.getCryptoAddresses = async (req, res) => {
   try {
+    console.log('User getCryptoAddresses called');
     const addresses = await Config.findOne({ key: 'crypto_addresses' });
+    console.log('Found addresses for user:', addresses ? addresses.value : 'Not found');
     
     if (!addresses) {
       // Return default addresses if none are configured
       const defaultAddresses = {
         BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
         ETH: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-        USDT: 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa'
+        USDT: 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa',
+        XRP: 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh'
       };
+      console.log('Returning default addresses to user:', defaultAddresses);
       return res.json(defaultAddresses);
     }
     
@@ -323,11 +327,15 @@ exports.getCryptoAddresses = async (req, res) => {
       BTC: addresses.value.BTC,
       ETH: addresses.value.ETH,
       USDT: addresses.value.USDT,
+      XRP: addresses.value.XRP,
       BTC_QR: addresses.value.BTC_QR || null,
       ETH_QR: addresses.value.ETH_QR || null,
-      USDT_QR: addresses.value.USDT_QR || null
+      USDT_QR: addresses.value.USDT_QR || null,
+      XRP_QR: addresses.value.XRP_QR || null
     };
     
+    console.log('Returning addresses to user:', addressesWithQR);
+    console.log('XRP address for user:', addressesWithQR.XRP);
     res.json(addressesWithQR);
   } catch (err) {
     console.error('Error fetching crypto addresses:', err);

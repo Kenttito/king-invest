@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const RecentActivity = ({ activity: propActivity, isStandalone = true }) => {
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const RecentActivity = ({ activity: propActivity, isStandalone = true }) => {
     setError('');
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`/api/user/activity?limit=${limit}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/user/activity?limit=${limit}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Activity data received:', res.data);

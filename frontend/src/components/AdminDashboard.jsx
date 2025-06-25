@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,7 @@ const AdminDashboard = () => {
     setPendingWithdrawLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/transaction/withdrawals/pending', {
+      const res = await axios.get(`${API_BASE_URL}/api/transaction/withdrawals/pending`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPendingWithdrawals(res.data);
@@ -106,7 +108,7 @@ const AdminDashboard = () => {
     setError('');
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/user/all', {
+      const res = await axios.get(`${API_BASE_URL}/api/user/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -140,7 +142,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`/api/user/${editUser._id}`, form, {
+      await axios.put(`${API_BASE_URL}/api/user/${editUser._id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       closeEditModal();
@@ -165,7 +167,7 @@ const AdminDashboard = () => {
     try {
       console.log('Attempting to delete user:', deleteUserId);
       const token = localStorage.getItem('token');
-      const response = await axios.delete(`/api/user/${deleteUserId}`, {
+      const response = await axios.delete(`${API_BASE_URL}/api/user/${deleteUserId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Delete response:', response.data);
@@ -187,7 +189,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('/api/auth/admin/login-as-user', 
+      const res = await axios.post(`${API_BASE_URL}/api/auth/admin/login-as-user`, 
         { userId: user._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -212,7 +214,7 @@ const AdminDashboard = () => {
     setAllDepositsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/transaction/deposits/all', {
+      const res = await axios.get(`${API_BASE_URL}/api/transaction/deposits/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Backend now handles sorting with pending deposits first
@@ -225,6 +227,10 @@ const AdminDashboard = () => {
 
   // Filter deposits based on selected status
   const getFilteredDeposits = () => {
+    if (!Array.isArray(allDeposits)) {
+      console.error('allDeposits is not an array:', allDeposits);
+      return [];
+    }
     if (depositSortFilter === 'all') {
       return allDeposits;
     }
@@ -233,6 +239,10 @@ const AdminDashboard = () => {
 
   // Get count of pending deposits
   const getPendingDepositsCount = () => {
+    if (!Array.isArray(allDeposits)) {
+      console.error('allDeposits is not an array:', allDeposits);
+      return 0;
+    }
     return allDeposits.filter(deposit => deposit.status === 'pending').length;
   };
 
@@ -247,7 +257,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.delete('/api/transaction/deposits/clear', {
+      await axios.delete(`${API_BASE_URL}/api/transaction/deposits/clear`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchAllDeposits();
@@ -261,7 +271,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`/api/transaction/deposits/${id}/approve`, {}, {
+      await axios.post(`${API_BASE_URL}/api/transaction/deposits/${id}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchAllDeposits();
@@ -276,7 +286,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`/api/transaction/deposits/${id}/decline`, {}, {
+      await axios.post(`${API_BASE_URL}/api/transaction/deposits/${id}/decline`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchAllDeposits();
@@ -306,7 +316,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/transaction/admin/deposit', {
+      await axios.post(`${API_BASE_URL}/api/transaction/admin/deposit`, {
         userId: depositUser._id,
         amount: depositForm.amount,
         currency: depositForm.currency,
@@ -327,7 +337,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`/api/transaction/withdrawals/${id}/approve`, {}, {
+      await axios.post(`${API_BASE_URL}/api/transaction/withdrawals/${id}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchPendingWithdrawals();
@@ -342,7 +352,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`/api/transaction/withdrawals/${id}/decline`, {}, {
+      await axios.post(`${API_BASE_URL}/api/transaction/withdrawals/${id}/decline`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchPendingWithdrawals();
@@ -373,7 +383,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/transaction/admin/deduct', {
+      await axios.post(`${API_BASE_URL}/api/transaction/admin/deduct`, {
         userId: deductUser._id,
         amount: deductForm.amount,
         currency: deductForm.currency,
@@ -396,7 +406,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       console.log('Fetching crypto addresses with token:', token ? 'Token exists' : 'No token');
       
-      const res = await axios.get('/api/admin/crypto-addresses', {
+      const res = await axios.get(`${API_BASE_URL}/api/admin/crypto-addresses`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('Crypto addresses response:', res.data);
@@ -460,7 +470,7 @@ const AdminDashboard = () => {
         formData.append('USDT_QR', cryptoFiles.USDT_QR);
       }
       
-      const res = await axios.put('/api/admin/crypto-addresses', formData, {
+      const res = await axios.put(`${API_BASE_URL}/api/admin/crypto-addresses`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -599,7 +609,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map(user => (
+                    {Array.isArray(users) ? users.map(user => (
                       <tr key={user._id}>
                         <td>{user.email}</td>
                         <td>{user.firstName}</td>
@@ -616,7 +626,7 @@ const AdminDashboard = () => {
                           <button className="btn btn-danger btn-sm" onClick={() => openDeleteModal(user._id)}>Delete</button>
                         </td>
                       </tr>
-                    ))}
+                    )) : <tr><td colSpan="8">No users found or users is not an array.</td></tr>}
                   </tbody>
                 </table>
               )}
@@ -698,7 +708,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {getPaginatedDeposits().map(dep => (
+                    {Array.isArray(getPaginatedDeposits()) ? getPaginatedDeposits().map(dep => (
                       <tr key={dep._id}>
                         <td>{dep.user?.firstName} {dep.user?.lastName}</td>
                         <td>{dep.user?.email}</td>
@@ -722,7 +732,7 @@ const AdminDashboard = () => {
                           {dep.status !== 'pending' && <span className="text-muted">No actions available</span>}
                         </td>
                       </tr>
-                    ))}
+                    )) : <tr><td colSpan="8">No deposits found or deposits is not an array.</td></tr>}
                   </tbody>
                 </table>
               )}
@@ -766,7 +776,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {pendingWithdrawals.map(withdrawal => (
+                    {Array.isArray(pendingWithdrawals) ? pendingWithdrawals.map(withdrawal => (
                       <tr key={withdrawal._id}>
                         <td>{withdrawal.user?.firstName} {withdrawal.user?.lastName}</td>
                         <td>{withdrawal.user?.email}</td>
@@ -779,7 +789,7 @@ const AdminDashboard = () => {
                           <button className="btn btn-danger btn-sm" onClick={() => handleDeclineWithdrawal(withdrawal._id)} disabled={actionLoading}>Decline</button>
                         </td>
                       </tr>
-                    ))}
+                    )) : <tr><td colSpan="7">No pending withdrawals found or pendingWithdrawals is not an array.</td></tr>}
                   </tbody>
                 </table>
               )}

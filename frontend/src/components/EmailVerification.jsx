@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const EmailVerification = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [email, setEmail] = useState('');
@@ -37,7 +39,7 @@ const EmailVerification = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('/api/auth/verify-email', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/verify-email`, {
         email,
         code: verificationCode
       });
@@ -64,7 +66,7 @@ const EmailVerification = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('/api/auth/resend-verification', { email });
+      const response = await axios.post(`${API_BASE_URL}/api/auth/resend-verification`, { email });
       setSuccess(response.data.message);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend verification code');

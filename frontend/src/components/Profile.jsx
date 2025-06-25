@@ -5,6 +5,8 @@ import { UserNavbar } from './Navbar';
 import countries from '../data/countries';
 import currencies from '../data/currencies';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ const Profile = () => {
       setError('');
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('/api/user/profile', {
+        const res = await axios.get(`${API_BASE_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
@@ -98,7 +100,7 @@ const Profile = () => {
         country: getCountryCode(formData.country)
       };
       
-      const res = await axios.put('/api/user/profile', submitData, {
+      const res = await axios.put(`${API_BASE_URL}/api/user/profile`, submitData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

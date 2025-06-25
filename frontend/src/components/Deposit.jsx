@@ -13,6 +13,8 @@ const CURRENCIES = [
   { label: 'Tether (USDT)', value: 'USDT', type: 'crypto' },
 ];
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const Deposit = () => {
   // Deposit
   const [depositAmount, setDepositAmount] = useState('');
@@ -40,7 +42,7 @@ const Deposit = () => {
   useEffect(() => {
     const fetchCryptoAddresses = async () => {
       try {
-        const res = await axios.get('/api/user/crypto-addresses', {
+        const res = await axios.get(`${API_BASE_URL}/api/user/crypto-addresses`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCryptoAddresses(res.data);
@@ -128,7 +130,7 @@ const Deposit = () => {
     e.preventDefault();
     setDepositMsg('');
     try {
-      const res = await axios.post('/api/transaction/deposit', { amount: depositAmount, currency: depositCurrency, type: depositType }, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${API_BASE_URL}/api/transaction/deposit`, { amount: depositAmount, currency: depositCurrency, type: depositType }, { headers: { Authorization: `Bearer ${token}` } });
       setDepositMsg(res.data.message || 'Deposit submitted, awaiting approval.');
       setDepositAmount('');
       // Do not update balance immediately

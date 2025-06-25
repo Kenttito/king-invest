@@ -7,6 +7,8 @@ import ErrorBoundary from './ErrorBoundary';
 import SimpleBTCChart from './SimpleBTCChart';
 import RecentActivity from './RecentActivity';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 // Check if user is being impersonated by admin
 const isImpersonated = () => {
   const token = localStorage.getItem('impersonationToken');
@@ -49,7 +51,7 @@ const Dashboard = () => {
         }
 
         // Fetch wallet data
-        const walletRes = await axios.get('/api/user/wallet', {
+        const walletRes = await axios.get(`${API_BASE_URL}/api/user/wallet`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setWallet(walletRes.data);
@@ -87,7 +89,7 @@ const Dashboard = () => {
 
   // Fetch initial trader signals
   useEffect(() => {
-    fetch('/api/trader-signals/recent')
+    fetch(`${API_BASE_URL}/api/trader-signals/recent`)
       .then(res => res.json())
       .then(data => setTraders(data));
   }, []);
@@ -133,7 +135,7 @@ const Dashboard = () => {
     const fetchDemoAccount = async () => {
       try {
         setDemoLoading(true);
-        const res = await axios.get('/api/demo/account', {
+        const res = await axios.get(`${API_BASE_URL}/api/demo/account`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setDemoAccount(res.data);
@@ -199,7 +201,7 @@ const Dashboard = () => {
     setDemoLoading(true);
     try {
       const token = localStorage.getItem('impersonationToken') || localStorage.getItem('token');
-      const res = await axios.post('/api/demo/trade', {
+      const res = await axios.post(`${API_BASE_URL}/api/demo/trade`, {
         asset: selectedAsset,
         type,
         amount: amt,
@@ -221,7 +223,7 @@ const Dashboard = () => {
     setDemoError('');
     try {
       const token = localStorage.getItem('impersonationToken') || localStorage.getItem('token');
-      const res = await axios.post('/api/demo/reset', {}, {
+      const res = await axios.post(`${API_BASE_URL}/api/demo/reset`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDemoAccount(res.data);

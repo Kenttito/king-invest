@@ -10,6 +10,8 @@ const CURRENCIES = [
   { label: 'USDT', value: 'USDT', type: 'crypto' },
 ];
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const Withdrawal = () => {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawCurrency, setWithdrawCurrency] = useState('USD');
@@ -37,7 +39,7 @@ const Withdrawal = () => {
         withdrawData.receiveAddress = receiveAddress;
       }
       
-      const res = await axios.post('/api/transaction/withdraw', withdrawData, { 
+      const res = await axios.post(`${API_BASE_URL}/api/transaction/withdraw`, withdrawData, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       setWithdrawMsg(res.data.message);

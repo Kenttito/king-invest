@@ -27,7 +27,8 @@ router.put('/crypto-addresses',
   upload.fields([
     { name: 'BTC_QR', maxCount: 1 },
     { name: 'ETH_QR', maxCount: 1 },
-    { name: 'USDT_QR', maxCount: 1 }
+    { name: 'USDT_QR', maxCount: 1 },
+    { name: 'XRP_QR', maxCount: 1 }
   ]), 
   adminController.updateCryptoAddresses
 );

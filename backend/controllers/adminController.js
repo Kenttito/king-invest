@@ -71,14 +71,32 @@ exports.getCryptoAddresses = async (req, res) => {
       const defaultAddresses = {
         BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
         ETH: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-        USDT: 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa'
+        USDT: 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa',
+        XRP: 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh'
       };
-      console.log('Returning default addresses:', defaultAddresses);
+      console.log('No addresses found in DB, returning defaults:', defaultAddresses);
       return res.json(defaultAddresses);
     }
     
-    console.log('Returning stored addresses:', addresses.value);
-    res.json(addresses.value);
+    // Log the actual saved addresses
+    console.log('Raw addresses.value from DB:', addresses.value);
+    console.log('XRP address in DB:', addresses.value.XRP);
+    
+    // Ensure all required fields are present, but don't override existing values
+    const responseAddresses = {
+      BTC: addresses.value.BTC || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      ETH: addresses.value.ETH || '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+      USDT: addresses.value.USDT || 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa',
+      XRP: addresses.value.XRP || 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh',
+      // Include QR codes if they exist
+      BTC_QR: addresses.value.BTC_QR || null,
+      ETH_QR: addresses.value.ETH_QR || null,
+      USDT_QR: addresses.value.USDT_QR || null,
+      XRP_QR: addresses.value.XRP_QR || null
+    };
+    
+    console.log('Returning addresses to admin:', responseAddresses);
+    res.json(responseAddresses);
   } catch (err) {
     console.error('Error fetching crypto addresses:', err);
     res.status(500).json({ message: 'Server error' });
@@ -93,11 +111,11 @@ exports.updateCryptoAddresses = async (req, res) => {
     console.log('Request body:', req.body);
     console.log('Request files:', req.files);
     
-    const { BTC, ETH, USDT } = req.body;
+    const { BTC, ETH, USDT, XRP } = req.body;
     
     // Validate addresses
-    if (!BTC || !ETH || !USDT) {
-      console.log('Missing addresses:', { BTC, ETH, USDT });
+    if (!BTC || !ETH || !USDT || !XRP) {
+      console.log('Missing addresses:', { BTC, ETH, USDT, XRP });
       return res.status(400).json({ message: 'All crypto addresses are required' });
     }
     
@@ -116,12 +134,18 @@ exports.updateCryptoAddresses = async (req, res) => {
       console.log('Invalid USDT address:', USDT);
       return res.status(400).json({ message: 'Invalid USDT address format' });
     }
+    // XRP validation: starts with 'r' and length between 25 and 35 (typical for XRP)
+    if (!XRP.startsWith('r') || XRP.length < 25 || XRP.length > 35) {
+      console.log('Invalid XRP address:', XRP);
+      return res.status(400).json({ message: 'Invalid XRP address format' });
+    }
     
     // Create addresses object with QR code image paths
     const addresses = { 
       BTC, 
       ETH, 
-      USDT
+      USDT,
+      XRP
     };
     
     // Add QR code image paths if files were uploaded
@@ -135,9 +159,13 @@ exports.updateCryptoAddresses = async (req, res) => {
       if (req.files.USDT_QR) {
         addresses.USDT_QR = `/uploads/qr-codes/${req.files.USDT_QR[0].filename}`;
       }
+      if (req.files.XRP_QR) {
+        addresses.XRP_QR = `/uploads/qr-codes/${req.files.XRP_QR[0].filename}`;
+      }
     }
     
     console.log('Valid addresses and QR codes to save:', addresses);
+    console.log('XRP address being saved:', addresses.XRP);
     
     // Update or create the config
     const result = await Config.findOneAndUpdate(
@@ -146,6 +174,12 @@ exports.updateCryptoAddresses = async (req, res) => {
       { upsert: true, new: true }
     );
     console.log('Saved to DB:', result);
+    console.log('Saved XRP address in DB:', result.value.XRP);
+    
+    // Verify the save by fetching it back
+    const verifySave = await Config.findOne({ key: 'crypto_addresses' });
+    console.log('Verification - fetched from DB:', verifySave.value);
+    console.log('Verification - XRP address:', verifySave.value.XRP);
     
     res.json({ message: 'Crypto addresses and QR codes updated successfully', addresses });
   } catch (err) {

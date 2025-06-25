@@ -34,7 +34,11 @@ const startTraderSignalsWebSocket = require('./websocket/traderSignalsSocket');
 const startBinanceTradesWebSocket = require('./websocket/binanceTradesSocket');
 const demoRoutes = require('./routes/demo');
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve static files from uploads directory

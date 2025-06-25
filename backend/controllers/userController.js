@@ -322,12 +322,12 @@ exports.getCryptoAddresses = async (req, res) => {
       return res.json(defaultAddresses);
     }
     
-    // Return addresses with QR code image paths
+    // Ensure all required fields are present with fallbacks
     const addressesWithQR = {
-      BTC: addresses.value.BTC,
-      ETH: addresses.value.ETH,
-      USDT: addresses.value.USDT,
-      XRP: addresses.value.XRP,
+      BTC: addresses.value.BTC || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      ETH: addresses.value.ETH || '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+      USDT: addresses.value.USDT || 'TQn9Y2khDD95J42FQtQTdwVVR93QZ5Mqoa',
+      XRP: addresses.value.XRP || 'rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh',
       BTC_QR: addresses.value.BTC_QR || null,
       ETH_QR: addresses.value.ETH_QR || null,
       USDT_QR: addresses.value.USDT_QR || null,

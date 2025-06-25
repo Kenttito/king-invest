@@ -11,7 +11,7 @@ exports.deposit = async (req, res) => {
     
     // Create details object with coin information for crypto deposits
     const details = { currency, type };
-    if (type === 'crypto' && ['BTC', 'ETH', 'USDT'].includes(currency)) {
+    if (type === 'crypto' && ['BTC', 'ETH', 'USDT', 'XRP'].includes(currency)) {
       details.coin = currency; // Store the coin type for crypto deposits
       
       // Log specific crypto information
@@ -25,6 +25,9 @@ exports.deposit = async (req, res) => {
           break;
         case 'USDT':
           cryptoName = 'Tether (USDT)';
+          break;
+        case 'XRP':
+          cryptoName = 'Ripple (XRP)';
           break;
         default:
           cryptoName = currency;
@@ -140,6 +143,9 @@ exports.approveDeposit = async (req, res) => {
           break;
         case 'USDT':
           depositInfo = 'Tether (USDT) crypto deposit';
+          break;
+        case 'XRP':
+          depositInfo = 'Ripple (XRP) crypto deposit';
           break;
         default:
           depositInfo = `${coin} crypto deposit`;

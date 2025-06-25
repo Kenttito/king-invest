@@ -161,19 +161,19 @@ exports.updateCryptoAddresses = async (req, res) => {
       console.log('Files uploaded:', Object.keys(req.files));
       console.log('Files details:', req.files);
       
-      if (req.files.BTC_QR) {
+      if (req.files.BTC_QR && req.files.BTC_QR[0]) {
         console.log('BTC_QR file uploaded:', req.files.BTC_QR[0].filename);
         addresses.BTC_QR = `/uploads/qr-codes/${req.files.BTC_QR[0].filename}`;
       }
-      if (req.files.ETH_QR) {
+      if (req.files.ETH_QR && req.files.ETH_QR[0]) {
         console.log('ETH_QR file uploaded:', req.files.ETH_QR[0].filename);
         addresses.ETH_QR = `/uploads/qr-codes/${req.files.ETH_QR[0].filename}`;
       }
-      if (req.files.USDT_QR) {
+      if (req.files.USDT_QR && req.files.USDT_QR[0]) {
         console.log('USDT_QR file uploaded:', req.files.USDT_QR[0].filename);
         addresses.USDT_QR = `/uploads/qr-codes/${req.files.USDT_QR[0].filename}`;
       }
-      if (req.files.XRP_QR) {
+      if (req.files.XRP_QR && req.files.XRP_QR[0]) {
         console.log('XRP_QR file uploaded:', req.files.XRP_QR[0].filename);
         addresses.XRP_QR = `/uploads/qr-codes/${req.files.XRP_QR[0].filename}`;
       } else {
@@ -200,9 +200,12 @@ exports.updateCryptoAddresses = async (req, res) => {
     console.log('Verification - fetched from DB:', verifySave.value);
     console.log('Verification - XRP address:', verifySave.value.XRP);
     
-    res.json({ message: 'Crypto addresses and QR codes updated successfully', addresses });
+    res.json({ 
+      message: 'Crypto addresses and QR codes updated successfully', 
+      addresses: verifySave.value 
+    });
   } catch (err) {
     console.error('Error updating crypto addresses:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 }; 

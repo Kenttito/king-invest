@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const auth = require('../middlewares/auth');
-const upload = require('../middlewares/upload');
+const { upload, handleUploadErrors } = require('../middlewares/upload');
 
 // Middleware to check if user is admin
 const requireAdmin = (req, res, next) => {
@@ -30,6 +30,7 @@ router.put('/crypto-addresses',
     { name: 'USDT_QR', maxCount: 1 },
     { name: 'XRP_QR', maxCount: 1 }
   ]), 
+  handleUploadErrors,
   adminController.updateCryptoAddresses
 );
 

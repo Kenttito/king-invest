@@ -73,11 +73,14 @@ const Deposit = () => {
             console.warn('Failed to decode token:', e);
           }
         }
+        console.log('Fetching crypto addresses from:', `${API_BASE_URL}/api/user/crypto-addresses`);
         const res = await axios.get(`${API_BASE_URL}/api/user/crypto-addresses`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        console.log('Crypto addresses API response:', res.data);
         // Defensive type check
         if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+          console.log('Setting crypto addresses:', res.data);
           setCryptoAddresses(res.data);
           setCryptoQRImages({
             BTC_QR: res.data.BTC_QR,
@@ -86,13 +89,14 @@ const Deposit = () => {
             XRP_QR: res.data.XRP_QR
           });
         } else {
+          console.log('Invalid response format, using defaults');
           setCryptoAddresses({ BTC: '', ETH: '', USDT: '', XRP: '' });
           setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null, XRP_QR: null });
         }
       } catch (err) {
+        console.error('Failed to fetch crypto addresses:', err);
         setCryptoAddresses({ BTC: '', ETH: '', USDT: '', XRP: '' });
         setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null, XRP_QR: null });
-        console.error('Failed to fetch crypto addresses:', err);
       } finally {
         setLoadingAddresses(false);
       }

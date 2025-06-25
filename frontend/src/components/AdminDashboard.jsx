@@ -432,17 +432,22 @@ const AdminDashboard = () => {
           console.warn('Failed to decode token:', e);
         }
       }
+      console.log('Admin fetching crypto addresses from:', `${API_BASE_URL}/api/admin/crypto-addresses`);
       const res = await axios.get(`${API_BASE_URL}/api/admin/crypto-addresses`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('Admin crypto addresses API response:', res.data);
       // Defensive type check
       if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+        console.log('Admin setting crypto form:', res.data);
         setCryptoForm(res.data);
       } else {
+        console.log('Admin invalid response format, using defaults');
         setCryptoForm({ BTC: '', ETH: '', USDT: '', XRP: '' });
         setCryptoMsg('Failed to load crypto addresses.');
       }
     } catch (err) {
+      console.error('Admin failed to fetch crypto addresses:', err);
       setCryptoForm({ BTC: '', ETH: '', USDT: '', XRP: '' });
       setCryptoMsg('Failed to load crypto addresses.');
     }
@@ -459,6 +464,7 @@ const AdminDashboard = () => {
     setShowCryptoModal(false);
     setCryptoMsg('');
     // Don't reset cryptoForm to defaults - keep the current values
+    // This ensures the updated addresses remain visible
   };
 
   const handleCryptoChange = (e) => {
@@ -514,7 +520,16 @@ const AdminDashboard = () => {
       setCryptoMsg('Crypto addresses and QR codes updated successfully!');
       
       // Refresh the addresses from backend to ensure we have the latest data
+      console.log('Refreshing addresses after update...');
       await fetchCryptoAddresses();
+      
+      // Clear any uploaded files
+      setCryptoFiles({
+        BTC_QR: null,
+        ETH_QR: null,
+        USDT_QR: null,
+        XRP_QR: null
+      });
       
       setTimeout(() => {
         closeCryptoModal();

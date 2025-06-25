@@ -2,8 +2,27 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
+import { jwtDecode } from 'jwt-decode';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+// Utility to get the correct token
+const getAuthToken = () => localStorage.getItem('impersonationToken') || localStorage.getItem('token');
+
+// Add axios interceptor for global 401 handling (at the top of the file, after imports):
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('impersonationToken');
+      localStorage.removeItem('originalAdminToken');
+      localStorage.removeItem('impersonatedUser');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 const RecentActivity = ({ activity: propActivity, isStandalone = true }) => {
   const [activity, setActivity] = useState([]);
@@ -17,21 +36,26 @@ const RecentActivity = ({ activity: propActivity, isStandalone = true }) => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      if (token) {
+        try {
+          const payload = jwtDecode(token);
+          console.log('Decoded token payload:', payload);
+        } catch (e) {
+          console.warn('Failed to decode token:', e);
+        }
+      }
       const res = await axios.get(`${API_BASE_URL}/api/user/activity?limit=${limit}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Activity data received:', res.data);
-      
-      // Handle both old format (array) and new format (object with activity and totalCount)
+      // Defensive check for both array and object formats
       if (Array.isArray(res.data)) {
-        // Old format - just an array
-        console.log('Using old format - array');
         setActivity(res.data);
+      } else if (res.data && typeof res.data === 'object' && Array.isArray(res.data.activity)) {
+        setActivity(res.data.activity);
       } else {
-        // New format - object with activity and totalCount
-        console.log('Using new format - object');
-        setActivity(res.data.activity || []);
+        setActivity([]);
+        setError('Activity data is not in expected format.');
       }
       
       console.log('First activity item:', res.data.activity ? res.data.activity[0] : res.data[0]);

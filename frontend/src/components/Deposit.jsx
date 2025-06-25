@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { UserNavbar } from './Navbar';
+import { jwtDecode } from 'jwt-decode';
 
 const CURRENCIES = [
   { label: 'US Dollar (USD)', value: 'USD', type: 'fiat' },
@@ -14,6 +15,9 @@ const CURRENCIES = [
 ];
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+// Utility to get the correct token
+const getAuthToken = () => localStorage.getItem('impersonationToken') || localStorage.getItem('token');
 
 const Deposit = () => {
   // Deposit
@@ -38,30 +42,59 @@ const Deposit = () => {
 
   const token = localStorage.getItem('token');
 
+  // Add axios interceptor for global 401 handling
+  axios.interceptors.response.use(
+    response => response,
+    error => {
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('impersonationToken');
+        localStorage.removeItem('originalAdminToken');
+        localStorage.removeItem('impersonatedUser');
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+  );
+
   // Fetch crypto addresses from backend
   useEffect(() => {
     const fetchCryptoAddresses = async () => {
       try {
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const payload = jwtDecode(token);
+            console.log('Decoded token payload:', payload);
+          } catch (e) {
+            console.warn('Failed to decode token:', e);
+          }
+        }
         const res = await axios.get(`${API_BASE_URL}/api/user/crypto-addresses`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setCryptoAddresses(res.data);
-        // Set QR code images from backend response
-        setCryptoQRImages({
-          BTC_QR: res.data.BTC_QR,
-          ETH_QR: res.data.ETH_QR,
-          USDT_QR: res.data.USDT_QR
-        });
+        // Defensive type check
+        if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+          setCryptoAddresses(res.data);
+          setCryptoQRImages({
+            BTC_QR: res.data.BTC_QR,
+            ETH_QR: res.data.ETH_QR,
+            USDT_QR: res.data.USDT_QR
+          });
+        } else {
+          setCryptoAddresses({ BTC: '', ETH: '', USDT: '' });
+          setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null });
+        }
       } catch (err) {
+        setCryptoAddresses({ BTC: '', ETH: '', USDT: '' });
+        setCryptoQRImages({ BTC_QR: null, ETH_QR: null, USDT_QR: null });
         console.error('Failed to fetch crypto addresses:', err);
-        // Keep default addresses if fetch fails
       } finally {
         setLoadingAddresses(false);
       }
     };
-
     fetchCryptoAddresses();
-  }, [token]);
+  }, []);
 
   // Copy address to clipboard
   const copyToClipboard = async (address) => {

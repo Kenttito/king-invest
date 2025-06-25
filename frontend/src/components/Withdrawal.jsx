@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
+import { jwtDecode } from 'jwt-decode';
 
 const CURRENCIES = [
   { label: 'USD', value: 'USD', type: 'fiat' },
@@ -11,6 +12,27 @@ const CURRENCIES = [
 ];
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+// Utility to get the correct token
+const getAuthToken = () => localStorage.getItem('impersonationToken') || localStorage.getItem('token');
+
+// Add axios interceptor for global 401 handling (register only once)
+if (!window.__axios401InterceptorRegistered) {
+  axios.interceptors.response.use(
+    response => response,
+    error => {
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('impersonationToken');
+        localStorage.removeItem('originalAdminToken');
+        localStorage.removeItem('impersonatedUser');
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+  );
+  window.__axios401InterceptorRegistered = true;
+}
 
 const Withdrawal = () => {
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -28,6 +50,15 @@ const Withdrawal = () => {
     setWithdrawMsg('');
     setLoading(true);
     try {
+      const token = getAuthToken();
+      if (token) {
+        try {
+          const payload = jwtDecode(token);
+          console.log('Decoded token payload:', payload);
+        } catch (e) {
+          console.warn('Failed to decode token:', e);
+        }
+      }
       const withdrawData = { 
         amount: withdrawAmount, 
         currency: withdrawCurrency, 
@@ -42,9 +73,14 @@ const Withdrawal = () => {
       const res = await axios.post(`${API_BASE_URL}/api/transaction/withdraw`, withdrawData, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
-      setWithdrawMsg(res.data.message);
-      setWithdrawAmount('');
-      setReceiveAddress('');
+      // Defensive type check
+      if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+        setWithdrawMsg(res.data.message);
+        setWithdrawAmount('');
+        setReceiveAddress('');
+      } else {
+        setWithdrawMsg('Withdrawal response not in expected format.');
+      }
     } catch (err) {
       setWithdrawMsg(err.response?.data?.message || 'Withdrawal failed');
     }

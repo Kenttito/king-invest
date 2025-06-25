@@ -6,6 +6,7 @@ import TradingViewChart from './TradingViewChart';
 import ErrorBoundary from './ErrorBoundary';
 import SimpleBTCChart from './SimpleBTCChart';
 import RecentActivity from './RecentActivity';
+import { jwtDecode } from 'jwt-decode';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -19,6 +20,24 @@ const isImpersonated = () => {
 const handleCopy = (trader) => {
   alert(`You are now copying ${trader.name}'s most recent trade!`);
 };
+
+// Utility to get the correct token (impersonation/user)
+const getAuthToken = () => localStorage.getItem('impersonationToken') || localStorage.getItem('token');
+
+// Add axios interceptor for global 401 handling (at the top of the file, after imports):
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('impersonationToken');
+      localStorage.removeItem('originalAdminToken');
+      localStorage.removeItem('impersonatedUser');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 const Dashboard = () => {
   const [wallet, setWallet] = useState(null);
@@ -40,34 +59,42 @@ const Dashboard = () => {
   const token = localStorage.getItem('token');
 
   const fetchData = async () => {
-      setLoading(true);
-      setError('');
-      try {
-      // Use impersonation token if available, otherwise use regular token
-      const token = localStorage.getItem('impersonationToken') || localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
+    setLoading(true);
+    setError('');
+    try {
+      const token = getAuthToken();
+      if (token) {
+        try {
+          const payload = jwtDecode(token);
+          console.log('Decoded token payload:', payload);
+        } catch (e) {
+          console.warn('Failed to decode token:', e);
         }
-
-        // Fetch wallet data
-        const walletRes = await axios.get(`${API_BASE_URL}/api/user/wallet`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      }
+      // Fetch wallet data
+      const walletRes = await axios.get(`${API_BASE_URL}/api/user/wallet`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Defensive type check
+      if (walletRes.data && typeof walletRes.data === 'object' && !Array.isArray(walletRes.data)) {
         setWallet(walletRes.data);
-      } catch (err) {
-        if (err.response?.status === 401) {
-          localStorage.removeItem('token');
+      } else {
+        setWallet(null);
+        setError('Wallet data is not an object.');
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
         localStorage.removeItem('impersonationToken');
         localStorage.removeItem('originalAdminToken');
         localStorage.removeItem('impersonatedUser');
-          navigate('/login');
-        } else {
-          setError('Failed to fetch dashboard data');
-        }
+        navigate('/login');
+      } else {
+        setError('Failed to fetch dashboard data');
       }
-      setLoading(false);
-    };
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
     fetchData();
@@ -454,9 +481,7 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {traders.length === 0 ? (
-                      <tr><td colSpan={4} className="text-center">Loading trader signals...</td></tr>
-                    ) : traders.map((trader, idx) => (
+                    {Array.isArray(traders) ? traders.map((trader, idx) => (
                       <tr key={idx}>
                         <td><strong>{trader.name}</strong></td>
                         <td className="text-success">{trader.roi}</td>
@@ -473,7 +498,7 @@ const Dashboard = () => {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    )) : <tr><td colSpan={4} className="text-center">Loading trader signals...</td></tr>}
                   </tbody>
                 </table>
               </div>

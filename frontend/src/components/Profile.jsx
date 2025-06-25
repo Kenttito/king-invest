@@ -4,8 +4,27 @@ import { useNavigate } from 'react-router-dom';
 import { UserNavbar } from './Navbar';
 import countries from '../data/countries';
 import currencies from '../data/currencies';
+import { jwtDecode } from 'jwt-decode';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+// Utility to get the correct token
+const getAuthToken = () => localStorage.getItem('impersonationToken') || localStorage.getItem('token');
+
+// Add axios interceptor for global 401 handling (at the top of the file, after imports):
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('impersonationToken');
+      localStorage.removeItem('originalAdminToken');
+      localStorage.removeItem('impersonatedUser');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -40,19 +59,33 @@ const Profile = () => {
       setLoading(true);
       setError('');
       try {
-        const token = localStorage.getItem('token');
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const payload = jwtDecode(token);
+            console.log('Decoded token payload:', payload);
+          } catch (e) {
+            console.warn('Failed to decode token:', e);
+          }
+        }
         const res = await axios.get(`${API_BASE_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUser(res.data);
-        // Initialize form data - convert country code to name for form
-        setFormData({
-          firstName: res.data.firstName || '',
-          lastName: res.data.lastName || '',
-          country: getCountryName(res.data.country) || '',
-          currency: res.data.currency || '',
-          phone: res.data.phone || ''
-        });
+        // Defensive type check
+        if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+          setUser(res.data);
+          // Initialize form data - convert country code to name for form
+          setFormData({
+            firstName: res.data.firstName || '',
+            lastName: res.data.lastName || '',
+            country: getCountryName(res.data.country) || '',
+            currency: res.data.currency || '',
+            phone: res.data.phone || ''
+          });
+        } else {
+          setUser(null);
+          setError('Profile data is not an object.');
+        }
       } catch (err) {
         setError('Failed to fetch profile');
       }
@@ -93,7 +126,7 @@ const Profile = () => {
     setUpdateMessage('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       // Convert country name back to code for backend
       const submitData = {
         ...formData,

@@ -8,6 +8,9 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 // Utility to get the correct token (impersonation/admin/user)
 const getAuthToken = () => localStorage.getItem('impersonationToken') || localStorage.getItem('token');
 
+// Utility to get admin token for admin operations (never use impersonation token)
+const getAdminToken = () => localStorage.getItem('originalAdminToken') || localStorage.getItem('token');
+
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +73,7 @@ const AdminDashboard = () => {
   const fetchPendingWithdrawals = async () => {
     setPendingWithdrawLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       const res = await axios.get(`${API_BASE_URL}/api/transaction/withdrawals/pending`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -83,7 +86,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     // Check admin authentication
-    const token = getAuthToken();
+    const token = getAdminToken();
     if (!token) {
       navigate('/admin');
       return;
@@ -113,7 +116,7 @@ const AdminDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       if (token) {
         try {
           const payload = jwtDecode(token);
@@ -161,7 +164,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.put(`${API_BASE_URL}/api/user/${editUser._id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -186,7 +189,7 @@ const AdminDashboard = () => {
     setActionLoading(true);
     try {
       console.log('Attempting to delete user:', deleteUserId);
-      const token = getAuthToken();
+      const token = getAdminToken();
       const response = await axios.delete(`${API_BASE_URL}/api/user/${deleteUserId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -233,7 +236,7 @@ const AdminDashboard = () => {
   const fetchAllDeposits = async () => {
     setAllDepositsLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       const res = await axios.get(`${API_BASE_URL}/api/transaction/deposits/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -276,7 +279,7 @@ const AdminDashboard = () => {
   const clearAllDeposits = async () => {
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.delete(`${API_BASE_URL}/api/transaction/deposits/clear`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -290,7 +293,7 @@ const AdminDashboard = () => {
   const handleApproveDeposit = async (id) => {
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.post(`${API_BASE_URL}/api/transaction/deposits/${id}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -305,7 +308,7 @@ const AdminDashboard = () => {
   const handleDeclineDeposit = async (id) => {
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.post(`${API_BASE_URL}/api/transaction/deposits/${id}/decline`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -335,7 +338,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.post(`${API_BASE_URL}/api/transaction/admin/deposit`, {
         userId: depositUser._id,
         amount: depositForm.amount,
@@ -356,7 +359,7 @@ const AdminDashboard = () => {
   const handleApproveWithdrawal = async (id) => {
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.post(`${API_BASE_URL}/api/transaction/withdrawals/${id}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -371,7 +374,7 @@ const AdminDashboard = () => {
   const handleDeclineWithdrawal = async (id) => {
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.post(`${API_BASE_URL}/api/transaction/withdrawals/${id}/decline`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -402,7 +405,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     setActionLoading(true);
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       await axios.post(`${API_BASE_URL}/api/transaction/admin/deduct`, {
         userId: deductUser._id,
         amount: deductForm.amount,
@@ -423,7 +426,7 @@ const AdminDashboard = () => {
   // Crypto Address Management
   const fetchCryptoAddresses = async () => {
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       if (token) {
         try {
           const payload = jwtDecode(token);
@@ -484,7 +487,7 @@ const AdminDashboard = () => {
     setCryptoMsg('');
     
     try {
-      const token = getAuthToken();
+      const token = getAdminToken();
       console.log('Updating crypto addresses with token:', token ? 'Token exists' : 'No token');
       console.log('Crypto form data:', cryptoForm);
       console.log('Crypto files:', cryptoFiles);

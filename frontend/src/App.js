@@ -8,6 +8,8 @@ import Register from './components/Register';
 import RegistrationSuccess from './components/RegistrationSuccess';
 import EmailVerification from './components/EmailVerification';
 import Login from './components/Login';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import Dashboard from './components/Dashboard';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
@@ -27,6 +29,8 @@ function AppWrapper() {
         <Route path="/verify-email" element={<EmailVerification />} />
         <Route path="/pending-approval" element={<PendingApproval />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/deposit" element={<Deposit />} />
         <Route path="/withdrawal" element={<Withdrawal />} />

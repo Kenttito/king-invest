@@ -5,6 +5,7 @@ const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const { sendEmail, verifyEmailConfig } = require('../config/email');
 
 // Email transporter setup
 const createTransporter = () => {
@@ -89,79 +90,84 @@ const generateVerificationCode = () => {
 // Send verification email
 const sendVerificationEmail = async (email, code) => {
   try {
-    const transporter = createTransporter();
-    
-    if (!transporter) {
-      throw new Error('Email configuration missing');
-    }
-
-    // Verify transporter
-    await transporter.verify();
-    console.log('✅ Email transporter verified successfully');
-
-    // Use the verified sender email for SendGrid
-    const senderEmail = process.env.EMAIL_USER || 'kennetherauyi@gmail.com';
-
-    const mailOptions = {
-      from: senderEmail,
-      to: email,
-      subject: 'Email Verification Code - Kings Invest',
-      text: `verification code: ${code}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #333; text-align: center;">Kings Invest</h2>
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="color: #007bff; margin-bottom: 10px;">Email Verification</h3>
-            <p style="font-size: 16px; color: #666; margin-bottom: 20px;">Your verification code is:</p>
-            <div style="background-color: #007bff; color: white; padding: 15px; border-radius: 5px; font-size: 24px; font-weight: bold; letter-spacing: 3px;">
-              ${code}
-            </div>
-            <p style="font-size: 14px; color: #999; margin-top: 20px;">This code will expire in 24 hours.</p>
+    const subject = 'Welcome to Kings Invest - Complete Your Registration';
+    const textContent = `Your verification code is: ${code}`;
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Complete Your Registration</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
+          <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #d4af37;">
+            <h1 style="color: #d4af37; margin: 0; font-size: 28px;">Kings Invest</h1>
           </div>
-          <p style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">
-            If you didn't request this code, please ignore this email.
-          </p>
+          
+          <div style="padding: 30px 20px;">
+            <h2 style="color: #333; margin-bottom: 20px;">Welcome to Kings Invest!</h2>
+            
+            <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+              Thank you for creating your account. To complete your registration and start investing, please use the security code below:
+            </p>
+            
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0;">
+              <p style="color: #666; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">
+                Your Security Code
+              </p>
+              <div style="background-color: #d4af37; color: #1a1a1a; padding: 20px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 4px; font-family: 'Courier New', monospace;">
+                ${code}
+              </div>
+              <p style="color: #999; font-size: 14px; margin-top: 15px;">
+                This code will expire in 24 hours
+              </p>
+            </div>
+            
+            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 30px 0;">
+              <p style="color: #856404; font-size: 14px; margin: 0;">
+                <strong>🔒 Security Notice:</strong> Never share this code with anyone. Kings Invest will never ask for this code via phone or email.
+              </p>
+            </div>
+            
+            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+              Best regards,<br>
+              <strong>The Kings Invest Team</strong>
+            </p>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; border-top: 1px solid #eee; color: #999; font-size: 12px;">
+            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>If you didn't create an account, please ignore this email.</p>
+          </div>
         </div>
-      `
-    };
+      </body>
+      </html>
+    `;
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Verification email sent successfully:', info.messageId);
-    return true;
+    const result = await sendEmail(email, subject, htmlContent, textContent);
+    if (result.success) {
+      console.log('✅ Verification email sent successfully:', result.messageId);
+      return true;
+    } else {
+      console.error('❌ Verification email failed:', result.error);
+      return false;
+    }
   } catch (error) {
-    console.error('Email sending failed:', error.message);
+    console.error('❌ Email sending failed:', error.message);
     return false;
   }
 };
 
 // Generic email sending function
-const sendEmail = async (email, subject, htmlContent) => {
+const sendEmailLegacy = async (email, subject, htmlContent) => {
   try {
-    const transporter = createTransporter();
-    
-    if (!transporter) {
-      throw new Error('Email configuration missing');
-    }
-
-    // Verify transporter
-    await transporter.verify();
-    console.log('✅ Email transporter verified successfully');
-
-    // Use the verified sender email for SendGrid
-    const senderEmail = process.env.EMAIL_USER || 'kennetherauyi@gmail.com';
-
-    const mailOptions = {
-      from: senderEmail,
-      to: email,
-      subject: subject,
-      html: htmlContent
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully:', info.messageId);
-    return true;
+    const textContent = htmlContent.replace(/<[^>]*>/g, ''); // Strip HTML for text version
+    const result = await sendEmail(email, subject, htmlContent, textContent);
+    return result.success;
   } catch (error) {
-    console.error('Email sending failed:', error.message);
+    console.error('❌ Email sending failed:', error.message);
     return false;
   }
 };
@@ -520,7 +526,13 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // Create reset URL
-    const resetUrl = `${process.env.FRONTEND_URL || 'https://kenttito.github.io/king-invest'}/reset-password?token=${resetToken}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'https://kenttito.github.io/king-invest';
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+    
+    // Debug log
+    console.log('🔗 Generated reset URL:', resetUrl);
+    console.log('🔗 FRONTEND_URL env var:', process.env.FRONTEND_URL || 'NOT SET');
+    console.log('🔗 Using frontend URL:', frontendUrl);
 
     // Send email with reset link
     try {
@@ -587,7 +599,7 @@ exports.forgotPassword = async (req, res) => {
         </html>
       `;
 
-      const result = await sendEmail(user.email, 'Password Reset Request - Invest Platform', emailContent);
+      const result = await sendEmailLegacy(user.email, 'Password Reset Request - Invest Platform', emailContent);
       if (!result) {
         throw new Error('Email sending failed');
       }

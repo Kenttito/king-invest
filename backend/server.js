@@ -8,6 +8,7 @@ console.log('==============================');
 console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✅ SET' : '❌ NOT SET');
 console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✅ SET' : '❌ NOT SET');
 console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ SET' : '❌ NOT SET');
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL ? '✅ SET' : '❌ NOT SET');
 console.log('PORT:', process.env.PORT || '8080 (default)');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
 

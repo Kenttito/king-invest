@@ -82,12 +82,16 @@ const Deposit = () => {
         if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
           console.log('Setting crypto addresses:', res.data);
           setCryptoAddresses(res.data);
-          setCryptoQRImages({
-            BTC_QR: res.data.BTC_QR,
-            ETH_QR: res.data.ETH_QR,
-            USDT_QR: res.data.USDT_QR,
-            XRP_QR: res.data.XRP_QR
-          });
+          
+          // Fix QR code URLs by prepending the backend URL
+          const qrImages = {
+            BTC_QR: res.data.BTC_QR ? `${API_BASE_URL}${res.data.BTC_QR}` : null,
+            ETH_QR: res.data.ETH_QR ? `${API_BASE_URL}${res.data.ETH_QR}` : null,
+            USDT_QR: res.data.USDT_QR ? `${API_BASE_URL}${res.data.USDT_QR}` : null,
+            XRP_QR: res.data.XRP_QR ? `${API_BASE_URL}${res.data.XRP_QR}` : null
+          };
+          console.log('Setting QR images with full URLs:', qrImages);
+          setCryptoQRImages(qrImages);
         } else {
           console.log('Invalid response format, using defaults');
           setCryptoAddresses({ BTC: '', ETH: '', USDT: '', XRP: '' });

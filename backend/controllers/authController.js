@@ -3,81 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { sendEmail, verifyEmailConfig } = require('../config/email');
-
-// Email transporter setup
-const createTransporter = () => {
-  // Clean up the API key (remove any trailing characters)
-  let apiKey = process.env.EMAIL_PASS;
-  if (apiKey && apiKey.endsWith('%')) {
-    apiKey = apiKey.slice(0, -1);
-  }
-
-  const emailUser = process.env.EMAIL_USER;
-  const emailService = process.env.EMAIL_SERVICE || 'gmail';
-  const emailHost = process.env.EMAIL_HOST;
-  const emailPort = process.env.EMAIL_PORT || 587;
-  const emailSecure = process.env.EMAIL_SECURE === 'true';
-
-  // Check if we have credentials
-  if (!apiKey) {
-    console.error('Email configuration error: Missing API key');
-    return null;
-  }
-
-  // Use SendGrid if configured
-  if (emailHost === 'smtp.sendgrid.net' || emailService === 'sendgrid') {
-    console.log('🔧 Using SendGrid configuration...');
-    return nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 2525,
-      secure: false,
-      auth: {
-        user: 'apikey',
-        pass: apiKey
-      }
-    });
-  }
-
-  // Use Gmail or other SMTP
-  if (!emailUser) {
-    console.error('Email configuration error: Missing email user for SMTP');
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host: emailHost || 'smtp.gmail.com',
-    port: emailPort,
-    secure: emailSecure,
-    auth: {
-      user: emailUser,
-      pass: apiKey
-    }
-  });
-};
-
-// Global transporter instance
-let transporter = null;
-
-// Verify email configuration
-const verifyEmailConfig = async () => {
-  try {
-    transporter = createTransporter();
-    if (!transporter) {
-      console.error('Email transporter not available');
-      return false;
-    }
-
-    await transporter.verify();
-    console.log('Email configuration is valid');
-    return true;
-  } catch (error) {
-    console.error('Email configuration error:', error.message);
-    return false;
-  }
-};
 
 // Initialize email verification
 verifyEmailConfig();
@@ -223,11 +150,6 @@ exports.register = async (req, res) => {
 
     // Send verification email
     try {
-      if (!transporter) {
-        console.error('Email transporter not available');
-        throw new Error('Email configuration missing');
-      }
-
       const result = await sendVerificationEmail(email, emailConfirmationCode);
       if (!result) {
         throw new Error('Email sending failed');

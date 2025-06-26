@@ -6,9 +6,15 @@ const { upload, handleUploadErrors } = require('../middlewares/upload');
 
 // Middleware to check if user is admin
 const requireAdmin = (req, res, next) => {
+  console.log('🔍 Admin route accessed by user:', req.user);
+  console.log('🔍 User role:', req.user?.role);
+  console.log('🔍 Admin impersonation flag:', req.user?.adminImpersonation);
+  
   if (req.user && req.user.role === 'admin') {
+    console.log('✅ Admin access granted');
     next();
   } else {
+    console.log('❌ Admin access denied - user role:', req.user?.role);
     res.status(403).json({ message: 'Admin access required' });
   }
 };

@@ -18,7 +18,6 @@ import Withdrawal from './components/Withdrawal';
 import PendingApproval from './components/PendingApproval';
 
 function AppWrapper() {
-  const location = useLocation();
   return (
     <>
       <Routes>

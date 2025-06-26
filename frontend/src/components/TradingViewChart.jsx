@@ -27,12 +27,17 @@ const TradingViewChart = ({ symbol = 'BTCUSD' }) => {
     document.head.appendChild(script);
 
     return () => {
-      // Cleanup
+      // Cleanup with better error handling
       if (widgetRef.current) {
         try {
-          widgetRef.current.remove();
+          // Check if the widget still exists and has a valid parent
+          if (widgetRef.current && widgetRef.current.parentNode) {
+            widgetRef.current.remove();
+          }
         } catch (error) {
-          console.error('Error removing TradingView widget:', error);
+          console.warn('Error removing TradingView widget:', error);
+        } finally {
+          widgetRef.current = null;
         }
       }
     };
@@ -42,9 +47,16 @@ const TradingViewChart = ({ symbol = 'BTCUSD' }) => {
     if (!containerRef.current || !window.TradingView) return;
 
     try {
-      // Clear previous widget
+      // Clear previous widget with better error handling
       if (widgetRef.current) {
-        widgetRef.current.remove();
+        try {
+          if (widgetRef.current.parentNode) {
+            widgetRef.current.remove();
+          }
+        } catch (error) {
+          console.warn('Error removing previous widget:', error);
+        }
+        widgetRef.current = null;
       }
 
       // Create new widget
@@ -63,6 +75,16 @@ const TradingViewChart = ({ symbol = 'BTCUSD' }) => {
         container_id: containerRef.current.id,
         width: '100%',
         height: 500,
+        // Add error handling for WebSocket connections
+        overrides: {
+          "paneProperties.background": "#ffffff",
+          "paneProperties.vertGridProperties.color": "#e1e3e6",
+          "paneProperties.horzGridProperties.color": "#e1e3e6",
+        },
+        // Disable some features that might cause WebSocket issues
+        studies_overrides: {},
+        disabled_features: ["use_localstorage_for_settings"],
+        enabled_features: ["study_templates"],
       });
     } catch (error) {
       console.error('Error creating TradingView widget:', error);

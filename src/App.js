@@ -1,22 +1,76 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './i18n'; // Import i18n configuration
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import LandingPage from './components/LandingPage';
+import Register from './components/Register';
+import RegistrationSuccess from './components/RegistrationSuccess';
+import EmailVerification from './components/EmailVerification';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
+import RecentActivity from './components/RecentActivity';
+import Profile from './components/Profile';
+import Deposit from './components/Deposit';
+import Withdrawal from './components/Withdrawal';
+import PendingApproval from './components/PendingApproval';
 
-function App() {
+function AppWrapper() {
+  // Add Tawk.to script as backup
   useEffect(() => {
+    // Check if Tawk.to is already loaded
+    if (window.Tawk_API) {
+      return;
+    }
+
+    // Create Tawk.to container if it doesn't exist
+    if (!document.getElementById('tawk_685c582e71a033190a6217df')) {
+      const tawkDiv = document.createElement('div');
+      tawkDiv.id = 'tawk_685c582e71a033190a6217df';
+      document.body.appendChild(tawkDiv);
+    }
+
+    // Initialize Tawk.to
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = new Date();
+    window.Tawk_API.embedded = 'tawk_685c582e71a033190a6217df';
+
     const script = document.createElement('script');
-    script.src = 'https://embed.tawk.to/685c582e71a033190a6217df/1iukc8rea';
     script.async = true;
+    script.src = 'https://embed.tawk.to/685c582e71a033190a6217df/1iukbgtn6';
     script.charset = 'UTF-8';
     script.setAttribute('crossorigin', '*');
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
+    
+    document.head.appendChild(script);
   }, []);
 
   return (
+    <>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/registration-success" element={<RegistrationSuccess />} />
+        <Route path="/verify-email" element={<EmailVerification />} />
+        <Route path="/pending-approval" element={<PendingApproval />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/deposit" element={<Deposit />} />
+        <Route path="/withdrawal" element={<Withdrawal />} />
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/activity" element={<RecentActivity />} />
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
     <BrowserRouter>
-      <div>App Content</div>
+      <AppWrapper />
     </BrowserRouter>
   );
 }

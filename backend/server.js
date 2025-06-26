@@ -42,6 +42,7 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
+      'https://kenttito.github.io',
       process.env.FRONTEND_URL
     ].filter(Boolean);
     

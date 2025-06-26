@@ -525,26 +525,69 @@ exports.forgotPassword = async (req, res) => {
     // Send email with reset link
     try {
       const emailContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #d4af37;">Password Reset Request</h2>
-          <p>Hello ${user.firstName},</p>
-          <p>You have requested to reset your password for your Invest Platform account.</p>
-          <p>Click the button below to reset your password:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetUrl}" 
-               style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-              Reset Password
-            </a>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Password Reset Request</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
+            <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #d4af37;">
+              <h1 style="color: #d4af37; margin: 0; font-size: 28px;">Invest Platform</h1>
+            </div>
+            
+            <div style="padding: 30px 20px;">
+              <h2 style="color: #333; margin-bottom: 20px;">Password Reset Request</h2>
+              
+              <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                Hello ${user.firstName},
+              </p>
+              
+              <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                You have requested to reset your password for your Invest Platform account. 
+                Click the button below to reset your password:
+              </p>
+              
+              <div style="text-align: center; margin: 40px 0;">
+                <a href="${resetUrl}" 
+                   style="display: inline-block; background-color: #d4af37; color: #1a1a1a; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">
+                  Reset Password
+                </a>
+              </div>
+              
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 30px 0;">
+                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                  <strong>If the button above doesn't work, copy and paste this link into your browser:</strong>
+                </p>
+                <p style="word-break: break-all; color: #d4af37; font-size: 14px; background-color: #fff; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">
+                  ${resetUrl}
+                </p>
+              </div>
+              
+              <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 30px 0;">
+                <p style="color: #856404; font-size: 14px; margin: 0;">
+                  <strong>⚠️ Security Notice:</strong> This link will expire in 1 hour for security reasons. 
+                  If you didn't request this password reset, please ignore this email.
+                </p>
+              </div>
+              
+              <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                Best regards,<br>
+                <strong>Invest Platform Team</strong>
+              </p>
+            </div>
+            
+            <div style="text-align: center; padding: 20px; border-top: 1px solid #eee; color: #999; font-size: 12px;">
+              <p>This is an automated message. Please do not reply to this email.</p>
+            </div>
           </div>
-          <p>If the button doesn't work, copy and paste this link into your browser:</p>
-          <p style="word-break: break-all; color: #666;">${resetUrl}</p>
-          <p>This link will expire in 1 hour for security reasons.</p>
-          <p>If you didn't request this password reset, please ignore this email.</p>
-          <p>Best regards,<br>Invest Platform Team</p>
-        </div>
+        </body>
+        </html>
       `;
 
-      const result = await sendEmail(user.email, 'Password Reset Request', emailContent);
+      const result = await sendEmail(user.email, 'Password Reset Request - Invest Platform', emailContent);
       if (!result) {
         throw new Error('Email sending failed');
       }

@@ -134,6 +134,38 @@ const sendVerificationEmail = async (email, code) => {
   }
 };
 
+// Generic email sending function
+const sendEmail = async (email, subject, htmlContent) => {
+  try {
+    const transporter = createTransporter();
+    
+    if (!transporter) {
+      throw new Error('Email configuration missing');
+    }
+
+    // Verify transporter
+    await transporter.verify();
+    console.log('✅ Email transporter verified successfully');
+
+    // Use the verified sender email for SendGrid
+    const senderEmail = process.env.EMAIL_USER || 'kennetherauyi@gmail.com';
+
+    const mailOptions = {
+      from: senderEmail,
+      to: email,
+      subject: subject,
+      html: htmlContent
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('Email sending failed:', error.message);
+    return false;
+  }
+};
+
 exports.register = async (req, res) => {
   try {
     const { email, password, firstName, lastName, country, currency, phone, role } = req.body;
@@ -461,5 +493,159 @@ exports.adminLoginAsUser = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// Forgot password - send reset link
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Email address not found' });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' } // Token expires in 1 hour
+    );
+
+    // Store reset token in user document
+    user.passwordResetToken = resetToken;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+    await user.save();
+
+    // Create reset URL
+    const resetUrl = `${process.env.FRONTEND_URL || 'https://kenttito.github.io/king-invest'}/reset-password?token=${resetToken}`;
+
+    // Send email with reset link
+    try {
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #d4af37;">Password Reset Request</h2>
+          <p>Hello ${user.firstName},</p>
+          <p>You have requested to reset your password for your Invest Platform account.</p>
+          <p>Click the button below to reset your password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" 
+               style="background-color: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              Reset Password
+            </a>
+          </div>
+          <p>If the button doesn't work, copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; color: #666;">${resetUrl}</p>
+          <p>This link will expire in 1 hour for security reasons.</p>
+          <p>If you didn't request this password reset, please ignore this email.</p>
+          <p>Best regards,<br>Invest Platform Team</p>
+        </div>
+      `;
+
+      const result = await sendEmail(user.email, 'Password Reset Request', emailContent);
+      if (!result) {
+        throw new Error('Email sending failed');
+      }
+
+      res.json({ message: 'Password reset link sent to your email address' });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Clear the reset token if email fails
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save();
+      res.status(500).json({ message: 'Failed to send reset email. Please try again later.' });
+    }
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+};
+
+// Validate reset password token
+exports.validateResetToken = async (req, res) => {
+  try {
+    const { token } = req.query;
+    
+    if (!token) {
+      return res.status(400).json({ message: 'Reset token is required' });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Find user with this token
+    const user = await User.findOne({
+      _id: decoded.userId,
+      passwordResetToken: token,
+      passwordResetExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    res.json({ message: 'Token is valid' });
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(400).json({ message: 'Invalid reset token' });
+    }
+    if (err.name === 'TokenExpiredError') {
+      return res.status(400).json({ message: 'Reset token has expired' });
+    }
+    console.error('Validate reset token error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Reset password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and password are required' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Find user with this token
+    const user = await User.findOne({
+      _id: decoded.userId,
+      passwordResetToken: token,
+      passwordResetExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update user password and clear reset token
+    user.password = hashedPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(400).json({ message: 'Invalid reset token' });
+    }
+    if (err.name === 'TokenExpiredError') {
+      return res.status(400).json({ message: 'Reset token has expired' });
+    }
+    console.error('Reset password error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 }; 

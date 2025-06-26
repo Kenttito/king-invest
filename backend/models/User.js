@@ -25,6 +25,9 @@ const userSchema = new mongoose.Schema({
   registrationIP: { type: String },
   registrationDate: { type: Date, default: Date.now },
   lastLoginDate: { type: Date },
+  // Password reset fields
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema); 

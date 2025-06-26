@@ -41,7 +41,7 @@ function AppWrapper() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/king-invest">
       <AppWrapper />
     </BrowserRouter>
   );

@@ -302,6 +302,7 @@ const Deposit = () => {
                                   src={cryptoQRImages[`${depositCurrency}_QR`]} 
                                   alt={`${depositCurrency} QR Code`} 
                                   style={{ width: '120px', height: '120px' }} 
+                                  onError={e => { e.target.onerror = null; e.target.src = '/default-qr.png'; }}
                                 />
                               ) : (
                                 <QRCodeSVG 

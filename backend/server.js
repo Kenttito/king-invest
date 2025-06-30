@@ -78,32 +78,39 @@ app.use('/api/demo', demoRoutes);
 // Create server
 const server = http.createServer(app);
 
-// Start server first, then handle database and WebSocket connections
-server.listen(PORT, '0.0.0.0', () => {
-  console.log('🚀 Full backend server running on', PORT);
-  
-  // Connect to database after server is running
-  if (process.env.MONGODB_URI) {
-    connectDB().then(() => {
-      console.log('✅ Database connected successfully');
-    }).catch((err) => {
-      console.error('❌ Database connection failed:', err.message);
-      // Don't exit process, let server continue running
+// Connect to database first, then start server
+if (process.env.MONGODB_URI) {
+  connectDB().then(() => {
+    console.log('✅ Database connected successfully');
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log('🚀 Full backend server running on', PORT);
+      // Start WebSocket connections
+      try {
+        startTraderSignalsWebSocket(server);
+        startBinanceTradesWebSocket(server);
+        console.log('✅ WebSocket connections started');
+      } catch (error) {
+        console.error('❌ WebSocket connection failed:', error.message);
+      }
     });
-  } else {
-    console.log('⚠️ MONGODB_URI not set, skipping database connection');
-  }
-  
-  // Start WebSocket connections
-  try {
-startTraderSignalsWebSocket(server);
-startBinanceTradesWebSocket(server);
-    console.log('✅ WebSocket connections started');
-  } catch (error) {
-    console.error('❌ WebSocket connection failed:', error.message);
+  }).catch((err) => {
+    console.error('❌ Database connection failed:', err.message);
     // Don't exit process, let server continue running
-  }
-});
+  });
+} else {
+  console.log('⚠️ MONGODB_URI not set, skipping database connection');
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log('🚀 Full backend server running on', PORT);
+    // Start WebSocket connections
+    try {
+      startTraderSignalsWebSocket(server);
+      startBinanceTradesWebSocket(server);
+      console.log('✅ WebSocket connections started');
+    } catch (error) {
+      console.error('❌ WebSocket connection failed:', error.message);
+    }
+  });
+}
 
 // Handle server errors gracefully
 server.on('error', (error) => {

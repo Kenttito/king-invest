@@ -1,6 +1,86 @@
 const Wallet = require('../models/Wallet');
 const Transaction = require('../models/Transaction');
 const InvestmentPlan = require('../models/InvestmentPlan');
+const User = require('../models/User');
+const { sendEmail } = require('../config/email');
+
+// Helper: Send transaction email (deposit/withdrawal, all statuses)
+async function sendTransactionEmail(user, tx, type, status) {
+  const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+  let subject, statusText, introText;
+  if (status === 'submitted') {
+    subject = `Your ${typeLabel} Has Been Successfully Submitted`;
+    statusText = 'Submitted';
+    introText = `We're writing to confirm that your ${type} has been successfully submitted.`;
+  } else if (status === 'approved') {
+    subject = `Your ${typeLabel} Has Been Approved`;
+    statusText = 'Approved';
+    introText = `Good news! Your ${type} has been approved.`;
+  } else if (status === 'declined') {
+    subject = `Your ${typeLabel} Has Been Declined`;
+    statusText = 'Declined';
+    introText = `We're sorry, but your ${type} has been declined.`;
+  } else {
+    subject = `Your ${typeLabel} Update`;
+    statusText = status;
+    introText = `There is an update regarding your ${type}.`;
+  }
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #d4af37;">${typeLabel} ${statusText}</h2>
+      <p>Hi ${user.firstName},</p>
+      <p>${introText}</p>
+      <p><b>📌 Transaction Details:</b></p>
+      <ul>
+        <li>Transaction Type: ${typeLabel}</li>
+        <li>Amount: ${tx.amount} ${tx.details.currency}</li>
+        <li>Date: ${tx.createdAt ? tx.createdAt.toLocaleString() : new Date().toLocaleString()}</li>
+        <li>Status: ${statusText}</li>
+        <li>Transaction ID: ${tx._id}</li>
+      </ul>
+      <br/>
+      <p>If you did not authorize this transaction or have any questions, please contact our support team immediately.</p>
+      <p style="font-size: 12px; color: #888;"><b>Note:</b> This is an automated email confirmation. No further action is required.<br/>Kings Invest Team</p>
+    </div>
+  `;
+  await sendEmail(user.email, subject, html);
+}
+
+// Helper: Send deposit email
+async function sendDepositEmail(user, tx) {
+  const subject = 'Deposit Submitted - Kings Invest';
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #d4af37;">Deposit Submitted</h2>
+      <p>Hi ${user.firstName},</p>
+      <p>Your deposit of <b>${tx.amount} ${tx.details.currency}</b> has been submitted and is pending approval.</p>
+      <p>Status: <b>${tx.status}</b></p>
+      <p>Date: ${tx.createdAt.toLocaleString()}</p>
+      <hr/>
+      <p style="font-size: 12px; color: #888;">If you did not make this deposit, please contact support immediately.</p>
+      <p style="font-size: 12px; color: #888;">Kings Invest Team</p>
+    </div>
+  `;
+  await sendEmail(user.email, subject, html);
+}
+
+// Helper: Send withdrawal email
+async function sendWithdrawalEmail(user, tx) {
+  const subject = 'Withdrawal Requested - Kings Invest';
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #d4af37;">Withdrawal Requested</h2>
+      <p>Hi ${user.firstName},</p>
+      <p>Your withdrawal of <b>${tx.amount} ${tx.details.currency}</b> has been submitted and is pending approval.</p>
+      <p>Status: <b>${tx.status}</b></p>
+      <p>Date: ${tx.createdAt.toLocaleString()}</p>
+      <hr/>
+      <p style="font-size: 12px; color: #888;">If you did not request this withdrawal, please contact support immediately.</p>
+      <p style="font-size: 12px; color: #888;">Kings Invest Team</p>
+    </div>
+  `;
+  await sendEmail(user.email, subject, html);
+}
 
 exports.deposit = async (req, res) => {
   try {
@@ -38,6 +118,10 @@ exports.deposit = async (req, res) => {
     // Create a pending deposit transaction, do not update wallet balance yet
     const tx = new Transaction({ user: userId, type: 'deposit', amount, status: 'pending', details });
     await tx.save();
+    
+    // Send deposit submitted email
+    const user = await User.findById(userId);
+    if (user) await sendTransactionEmail(user, tx, 'deposit', 'submitted');
     
     const message = type === 'crypto' ? 
       `${currency} crypto deposit submitted, awaiting approval.` : 
@@ -157,6 +241,10 @@ exports.approveDeposit = async (req, res) => {
     console.log(`Deposit approved for user ${userId}: ${amount} added to balance and invested from ${depositInfo}. New balance: ${wallet.balance}, New invested: ${wallet.invested}`);
     console.log('=== APPROVE DEPOSIT END ===');
     
+    // Send deposit approved email
+    const user = await User.findById(userId);
+    if (user) await sendTransactionEmail(user, tx, 'deposit', 'approved');
+    
     res.json({ 
       message: `Deposit approved and wallet updated. ${depositInfo} of ${amount} added to total balance and amount invested.` 
     });
@@ -174,6 +262,9 @@ exports.declineDeposit = async (req, res) => {
     if (!tx || tx.status !== 'pending' || tx.type !== 'deposit') return res.status(404).json({ message: 'Deposit not found or not pending' });
     tx.status = 'declined';
     await tx.save();
+    // Send deposit declined email
+    const user = await User.findById(tx.user);
+    if (user) await sendTransactionEmail(user, tx, 'deposit', 'declined');
     res.json({ message: 'Deposit declined.' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to decline deposit', error: err.message });
@@ -224,6 +315,10 @@ exports.withdraw = async (req, res) => {
     // Create a pending withdrawal transaction
     const tx = new Transaction({ user: userId, wallet: wallet._id, type: 'withdrawal', amount: amt, status: 'pending', details: { currency, type } });
     await tx.save();
+    
+    // Send withdrawal submitted email
+    const user = await User.findById(userId);
+    if (user) await sendTransactionEmail(user, tx, 'withdrawal', 'submitted');
     
     res.json({ message: 'Withdrawal submitted, awaiting approval.' });
   } catch (err) {
@@ -424,6 +519,10 @@ exports.approveWithdrawal = async (req, res) => {
     console.log(`Withdrawal approved for user ${userId}: ${amount} from ${withdrawalInfo}. Transaction ID: ${id}`);
     console.log('=== APPROVE WITHDRAWAL END ===');
     
+    // Send withdrawal approved email
+    const user = await User.findById(userId);
+    if (user) await sendTransactionEmail(user, tx, 'withdrawal', 'approved');
+    
     res.json({ 
       message: `Withdrawal approved successfully. ${withdrawalInfo} of ${amount} has been processed.` 
     });
@@ -451,6 +550,10 @@ exports.declineWithdrawal = async (req, res) => {
     
     tx.status = 'declined';
     await tx.save();
+    
+    // Send withdrawal declined email
+    const user = await User.findById(tx.user);
+    if (user) await sendTransactionEmail(user, tx, 'withdrawal', 'declined');
     
     res.json({ message: 'Withdrawal declined and funds returned to balance.' });
   } catch (err) {

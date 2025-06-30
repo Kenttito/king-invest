@@ -11,7 +11,7 @@ const CURRENCIES = [
   { label: 'British Pound (GBP)', value: 'GBP', type: 'fiat' },
   { label: 'Bitcoin (BTC)', value: 'BTC', type: 'crypto' },
   { label: 'Ethereum (ETH)', value: 'ETH', type: 'crypto' },
-  { label: 'Tether (USDT)', value: 'USDT', type: 'crypto' },
+  { label: 'Tether (USDT) - Tron (TRC20)', value: 'USDT', type: 'crypto' },
   { label: 'Ripple (XRP)', value: 'XRP', type: 'crypto' },
 ];
 
@@ -334,6 +334,12 @@ const Deposit = () => {
                           </div>
                         </div>
                       </div>
+                      {depositCurrency === 'USDT' && (
+                        <div className="alert alert-warning mt-2" style={{ borderRadius: '10px', fontSize: '14px', background: '#f8f9fa', color: '#333', border: '1px solid #ffeaa7' }}>
+                          <i className="fab fa-usdt me-1"></i>
+                          <strong>Network:</strong> Tron (TRC20)
+                        </div>
+                      )}
                       <small className="text-muted">
                         <i className="fas fa-info-circle me-1"></i>
                         Please make the deposit to the wallet address above. Your balance will be updated after confirmation.

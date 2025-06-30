@@ -1063,7 +1063,9 @@ const AdminDashboard = () => {
                     </div>
                     <div className="col-md-3">
                       <div className="mb-3">
-                        <label className="form-label fw-bold">Tether (USDT) Address</label>
+                        <label className="form-label fw-bold">
+                          Tether (USDT) Address <span style={{color:'#d4af37', fontWeight:'bold'}}>- Tron (TRC20)</span>
+                        </label>
                         <input 
                           type="text" 
                           className="form-control" 
@@ -1073,7 +1075,9 @@ const AdminDashboard = () => {
                           placeholder="Enter USDT address"
                           required 
                         />
-                        <small className="text-muted">Must start with T and be at least 30 characters</small>
+                        <small className="text-warning">
+                          <i className="fab fa-usdt me-1"></i>Network: Tron (TRC20)
+                        </small>
                       </div>
                     </div>
                     <div className="col-md-3">
@@ -1122,7 +1126,9 @@ const AdminDashboard = () => {
                     </div>
                     <div className="col-md-3">
                       <div className="mb-3">
-                        <label className="form-label fw-bold">Tether (USDT) QR Code Image</label>
+                        <label className="form-label fw-bold">
+                          Tether (USDT) QR Code Image <span style={{color:'#d4af37', fontWeight:'bold'}}>- Tron (TRC20)</span>
+                        </label>
                         <input 
                           type="file" 
                           className="form-control" 
